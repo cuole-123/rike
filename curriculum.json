@@ -1,0 +1,253 @@
+{
+  "chapters": [
+    {
+      "id": "sf-c1",
+      "subject": "sf",
+      "title": "第1章 实数与数列极限",
+      "tasks": [
+        {
+          "id": "sf-c1-01",
+          "type": "note",
+          "ref": "§1.1 数轴",
+          "baseMin": 40,
+          "diff": 2,
+          "tip": "含 √n 无理数证明（例1），反证链条要写清"
+        },
+        {
+          "id": "sf-c1-02",
+          "type": "note",
+          "ref": "§1.2 无尽小数",
+          "baseMin": 40,
+          "diff": 2,
+          "tip": "实数=无尽小数，注意与数轴定义的关系"
+        },
+        {
+          "id": "sf-c1-03",
+          "type": "note",
+          "ref": "§1.3 数列和收敛数列",
+          "baseMin": 50,
+          "diff": 2
+        },
+        {
+          "id": "sf-c1-04",
+          "type": "note",
+          "ref": "§1.4 收敛数列的性质",
+          "baseMin": 60,
+          "diff": 3,
+          "tip": "本节定理最密：唯一性/有界性/保号性"
+        },
+        {
+          "id": "sf-c1-05",
+          "type": "note",
+          "ref": "§1.5 数列极限概念的推广",
+          "baseMin": 35,
+          "diff": 2
+        },
+        {
+          "id": "sf-c1-06",
+          "type": "note",
+          "ref": "§1.6 单调数列",
+          "baseMin": 40,
+          "diff": 2
+        },
+        {
+          "id": "sf-c1-07",
+          "type": "note",
+          "ref": "§1.7 自然对数底 e",
+          "baseMin": 40,
+          "diff": 3
+        },
+        {
+          "id": "sf-c1-08",
+          "type": "note",
+          "ref": "§1.8 基本列和收敛原理",
+          "baseMin": 55,
+          "diff": 3,
+          "tip": "柯西准则，全章最抽象"
+        },
+        {
+          "id": "sf-c1-09",
+          "type": "note",
+          "ref": "§1.9 上确界和下确界",
+          "baseMin": 50,
+          "diff": 3,
+          "tip": "sup/inf 是后面所有定理的地基"
+        },
+        {
+          "id": "sf-c1-10",
+          "type": "note",
+          "ref": "§1.10 有限覆盖定理",
+          "baseMin": 50,
+          "diff": 3
+        },
+        {
+          "id": "sf-c1-11",
+          "type": "note",
+          "ref": "§1.11 上极限和下极限",
+          "baseMin": 55,
+          "diff": 3,
+          "tip": "limsup/liminf 极易混，建议画图"
+        },
+        {
+          "id": "sf-c1-12",
+          "type": "note",
+          "ref": "§1.12 Stolz 定理",
+          "baseMin": 45,
+          "diff": 2
+        },
+        {
+          "id": "sf-c1-13",
+          "type": "note",
+          "ref": "§1.13 数列极限的应用",
+          "baseMin": 45,
+          "diff": 2
+        }
+      ]
+    },
+    {
+      "id": "sf-c2",
+      "subject": "sf",
+      "title": "第2章 §2.4 函数的极限",
+      "tasks": [
+        {
+          "id": "sf-c2-01",
+          "type": "video",
+          "ref": "第 021 讲 函数极限的概念",
+          "baseMin": 30,
+          "vidMin": 61,
+          "diff": 1
+        },
+        {
+          "id": "sf-c2-02",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 1–4 题",
+          "baseMin": 40,
+          "count": 4,
+          "diff": 2
+        },
+        {
+          "id": "sf-c2-03",
+          "type": "note",
+          "ref": "费曼讲义：函数极限的概念",
+          "baseMin": 45,
+          "diff": 2
+        },
+        {
+          "id": "sf-c2-04",
+          "type": "video",
+          "ref": "第 022 讲 Heine 归结原理",
+          "baseMin": 30,
+          "vidMin": 61,
+          "diff": 2
+        },
+        {
+          "id": "sf-c2-05",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 5、8、9、10 题",
+          "baseMin": 45,
+          "count": 4,
+          "diff": 2
+        },
+        {
+          "id": "sf-c2-06",
+          "type": "note",
+          "ref": "费曼讲义：Heine 归结原理",
+          "baseMin": 40,
+          "diff": 2
+        }
+      ]
+    },
+    {
+      "id": "gd-c2",
+      "subject": "gd",
+      "title": "第2章 §2.5 克拉默法则",
+      "tasks": [
+        {
+          "id": "gd-c2-01",
+          "type": "video",
+          "ref": "第 016 讲 克莱姆法则",
+          "baseMin": 12,
+          "vidMin": 23,
+          "diff": 1
+        },
+        {
+          "id": "gd-c2-02",
+          "type": "example",
+          "ref": "§2.5 例 1–3",
+          "baseMin": 30,
+          "diff": 2,
+          "tip": "例3 套路：先算 |A| 定唯一解范围，再化增广矩阵"
+        },
+        {
+          "id": "gd-c2-03",
+          "type": "exercise",
+          "ref": "习题 2.5 第 1 题（判解）",
+          "baseMin": 8,
+          "count": 1,
+          "diff": 1
+        },
+        {
+          "id": "gd-c2-04",
+          "type": "exercise",
+          "ref": "习题 2.5 第 2 题（范德蒙德型）",
+          "baseMin": 10,
+          "count": 1,
+          "diff": 2
+        },
+        {
+          "id": "gd-c2-05",
+          "type": "exercise",
+          "ref": "习题 2.5 第 3 题（λ 有非零解）",
+          "baseMin": 14,
+          "count": 1,
+          "diff": 2
+        },
+        {
+          "id": "gd-c2-06",
+          "type": "exercise",
+          "ref": "习题 2.5 第 4 题（a,b 有非零解）",
+          "baseMin": 10,
+          "count": 1,
+          "diff": 2
+        },
+        {
+          "id": "gd-c2-07",
+          "type": "exercise",
+          "ref": "习题 2.5 第 5 题（含参讨论）",
+          "baseMin": 20,
+          "count": 1,
+          "diff": 3,
+          "tip": "易漏：b=0 与 a=1 要分开"
+        },
+        {
+          "id": "gd-c2-08",
+          "type": "exercise",
+          "ref": "习题 2.5 第 6 题（含参讨论）",
+          "baseMin": 22,
+          "count": 1,
+          "diff": 3,
+          "tip": "b=0 时有无穷多解，与第 5 题相反"
+        }
+      ]
+    },
+    {
+      "id": "en-words",
+      "subject": "en",
+      "title": "考研词汇",
+      "tasks": [
+        {
+          "id": "en-01",
+          "type": "words",
+          "ref": "新词 40–60 + 复习到期",
+          "baseMin": 40,
+          "count": 50,
+          "diff": 1
+        }
+      ]
+    }
+  ],
+  "version": 6,
+  "defaults": {
+    "dailyTarget": 270
+  }
+}
