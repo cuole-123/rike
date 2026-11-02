@@ -640,6 +640,22 @@ function autoCloseOverdue(){
     var day=state.days[d];
     if(!day||day.submitted)return;
     if(now<dayCutoff(d))return;
+
+    /* 一整天什么都没动 → 不计入统计，也不要记 0 分 */
+    var touched=false;
+    day.plan.forEach(function(id){
+      var it=day.items[id]||{};
+      if(it.done||it.replaced)touched=true;
+    });
+    (day.extras||[]).forEach(function(){touched=true;});
+    (day.bonus||[]).forEach(function(b){ if(b.done)touched=true; });
+    if(!touched){
+      day.skipped=true;
+      day.plan=[];
+      changed=true;
+      return;
+    }
+
     var r=scoreDay(day);
     day.score=r.score;
     day.completion=r.completion;
