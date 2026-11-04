@@ -476,6 +476,7 @@ try{
   if(!state.journey)state.journey={total:0,start:null,days:{}};
 }catch(e){state=defaultState();}
 function save(){
+  state.updatedAt=Date.now();
   try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){}
   try{ if(typeof scheduleSync==='function') scheduleSync(); }catch(e){}
 }
@@ -521,6 +522,27 @@ function syncUpload(silent){
     .catch(function(){ if(!silent)toast('上传失败，检查网络'); })
     .then(function(){ syncBusy=false; });
 }
+function syncPullSilent(){
+  var c=syncCfg();
+  if(!c.enabled||!c.token||!c.repo)return;
+  syncBusy=true;
+  var url='https://api.github.com/repos/'+c.repo+'/contents/state.json';
+  fetch(url,{headers:{'Authorization':'***'+c.token,'Accept':'application/vnd.github+json'}})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(meta){
+      if(!meta){ syncBusy=false; return; }
+      var txt=decodeURIComponent(escape(atob(meta.content.replace(/\s/g,''))));
+      var remote=JSON.parse(txt);
+      if((remote.updatedAt||0)>(state.updatedAt||0)+60000){
+        state=remote; state.updatedAt=Date.now();
+        try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){}
+        renderHeader(); renderSheet(); toast('已从云端同步最新记录');
+      }
+      syncBusy=false;
+    })
+    .catch(function(){ syncBusy=false; });
+}
+
 function syncPull(){
   var c=syncCfg();
   if(!c.token||!c.repo){ toast('先填令牌'); return; }
@@ -1843,6 +1865,7 @@ renderHeader();
 ensureDay(todayStr());
 renderSheet();
 syncCurriculum();
+syncPullSilent();
 setInterval(function(){
   autoCloseOverdue();
   var d=todayStr();
