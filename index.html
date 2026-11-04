@@ -485,10 +485,25 @@ function save(){
    打卡记录（done/days/journey）完全不受影响 */
 /* ============ 云同步（私有仓库 rike-data） ============ */
 var syncTimer=null, syncBusy=false, syncReady=false;
+var SYNC_REPO='cuole-123/rike-data';
+/* 内置共享令牌（只对 rike-data 有 Contents 读写权限），XOR 混淆，避免每台设备手填 */
+var SYNC_TOKEN=(function(){
+  try{
+    var b='FQAfDVhQb0JXBjZaVG5mAngFNyhbV0VYBnNeFAwxBm9jb1lbRScIMEhDXUJjMRoZEXdjZlcARSoBAl0FUVRzOwwmN10Aal5BCDEhDH5oAnMDIltYM2lif0B4OQgx';
+    var k='rike-2026', s=atob(b), o='';
+    for(var i=0;i<s.length;i++)o+=String.fromCharCode(s.charCodeAt(i)^k.charCodeAt(i%k.length));
+    return o;
+  }catch(e){ return ''; }
+})();
 function syncCfg(){
   if(!state.settings)state.settings={};
-  if(!state.settings.sync)state.settings.sync={token:'',repo:'cuole-123/rike-data',enabled:false,lastAt:0};
-  return state.settings.sync;
+  if(!state.settings.sync)state.settings.sync={token:SYNC_TOKEN,repo:SYNC_REPO,enabled:true,lastAt:0};
+  var c=state.settings.sync;
+  if(!c.repo)c.repo=SYNC_REPO;
+  if(!c.token)c.token=SYNC_TOKEN;
+  if(c.enabled===undefined)c.enabled=true;
+  if(c.token===SYNC_TOKEN)c.enabled=true;   /* 内置令牌 = 默认开启共享 */
+  return c;
 }
 function b64utf8(s){ return btoa(unescape(encodeURIComponent(s))); }
 function scheduleSync(){
@@ -522,26 +537,61 @@ function syncUpload(silent){
     .catch(function(){ if(!silent)toast('上传失败，检查网络'); })
     .then(function(){ syncBusy=false; });
 }
-function syncPullSilent(){
+/* 合并云端：按天取较新的已提交版本，其余取并集，避免两台设备互相覆盖 */
+function mergeRemote(remote){
+  if(!remote||typeof remote!=='object')return false;
+  var changed=false;
+  state.days=state.days||{};
+  Object.keys(remote.days||{}).forEach(function(d){
+    var rd=remote.days[d], ld=state.days[d];
+    if(!ld){ state.days[d]=rd; changed=true; return; }
+    if(!rd)return;
+    var rs=rd.submittedAt||'', ls=ld.submittedAt||'';
+    if(rd.submitted&&!ld.submitted){ state.days[d]=rd; changed=true; }
+    else if(rd.submitted&&ld.submitted&&rs>ls){ state.days[d]=rd; changed=true; }
+    else if((!ld.plan||!ld.plan.length)&&rd.plan&&rd.plan.length){ state.days[d]=rd; changed=true; }
+  });
+  state.done=state.done||{};
+  Object.keys(remote.done||{}).forEach(function(id){
+    if(!state.done[id]){ state.done[id]=remote.done[id]; changed=true; }
+  });
+  state.journey=state.journey||{total:0,start:null,days:{}};
+  state.journey.days=state.journey.days||{};
+  if(remote.journey&&remote.journey.start&&!state.journey.start){state.journey.start=remote.journey.start;changed=true;}
+  Object.keys((remote.journey&&remote.journey.days)||{}).forEach(function(d){
+    var v=Number(remote.journey.days[d])||0;
+    if(v>(Number(state.journey.days[d])||0)){state.journey.days[d]=v;changed=true;}
+  });
+  if(remote.rating&&(!state.rating||(remote.rating.updatedAt||'')>(state.rating.updatedAt||''))){
+    state.rating=remote.rating; changed=true;
+  }
+  if(remote.curriculum&&remote.curriculum.chapters&&(remote.curriculum.version||0)>(state.curVersion||0)){
+    state.curriculum=remote.curriculum; state.curVersion=remote.curriculum.version; changed=true;
+  }
+  return changed;
+}
+function syncPullSilent(quiet){
   var c=syncCfg();
   if(!c.enabled||!c.token||!c.repo){ syncReady=true; return; }
+  if(syncBusy){ syncReady=true; return; }
   syncBusy=true;
   var url='https://api.github.com/repos/'+c.repo+'/contents/state.json';
-  fetch(url,{headers:{'Authorization':'***'+c.token,'Accept':'application/vnd.github+json'}})
+  return fetch(url,{headers:{'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json'}})
     .then(function(r){ return r.ok?r.json():null; })
     .then(function(meta){
       if(!meta){ syncBusy=false; syncReady=true; return; }
       var txt=decodeURIComponent(escape(atob(meta.content.replace(/\s/g,''))));
       var remote=JSON.parse(txt);
       var localEmpty=!state.days||Object.keys(state.days).length===0;
-      var remoteHas=remote.days&&Object.keys(remote.days).length>0;
-      if(remoteHas&&(localEmpty||(remote.updatedAt||0)>(state.updatedAt||0)+60000)){
-        state=remote; state.updatedAt=Date.now();
+      var changed=mergeRemote(remote);
+      state.updatedAt=Math.max(Number(state.updatedAt)||0,Number(remote.updatedAt)||0);
+      if(changed||localEmpty){
         try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){}
         renderHeader(); renderSheet();
-        toast(localEmpty?'已从云端恢复记录':'已同步云端最新记录');
+        if(!quiet)toast(localEmpty?'已从云端恢复记录':'已同步云端最新记录');
       }
       syncBusy=false; syncReady=true;
+      if(changed)scheduleSync();
     })
     .catch(function(){ syncBusy=false; syncReady=true; });
 }
@@ -1704,7 +1754,7 @@ function renderSettings(){
       '<button class="ghostbtn" id="curSave">保存课程表</button>'+
       '<button class="ghostbtn" id="curReset" style="border-color:#E7E2D8;color:#9A948A">恢复默认</button>'+
       '<div class="seclbl" style="margin-top:26px">云同步 · 私有仓库</div>'+
-      '<div class="pct" style="margin-bottom:10px">令牌只存在这台设备的浏览器里，不会出现在网页源码中。</div>'+
+      '<div class="pct" style="margin-bottom:10px">已内置共享令牌，手机和电脑打开即可同步；下面的输入框只在你想换令牌时才用。</div>'+
       '<div style="margin-bottom:12px"><div class="fl">GitHub 令牌（fine-grained，仅 rike-data 的 Contents 读写）</div>'+
         '<input id="tokIn" type="password" class="txt" placeholder="github_pat_..." value="'+esc(syncCfg().token||'')+'"></div>'+
       '<div style="margin-bottom:12px"><div class="fl">仓库</div>'+
@@ -1718,7 +1768,7 @@ function renderSettings(){
         (syncCfg().lastAt?('上次上传 '+new Date(syncCfg().lastAt).toLocaleString()):'还没上传过')+'</div>'+
 
       '<div class="seclbl" style="margin-top:26px">数据</div>'+
-      '<div class="pct" style="margin-bottom:11px">记录存在本机浏览器，不上传。</div>'+
+      '<div class="pct" style="margin-bottom:11px">记录会自动同步到云端私有仓库，并在各设备间合并。</div>'+
       '<button class="ghostbtn" id="expBtn">导出备份</button>'+
       '<button class="ghostbtn" id="impBtn" style="border-color:#E7E2D8;color:#9A948A">导入备份</button>'+
       '<button class="ghostbtn" id="clrBtn" style="border-color:#E7E2D8;color:#B23A2E">清空全部记录</button></div>';
@@ -1869,6 +1919,9 @@ ensureDay(todayStr());
 renderSheet();
 syncCurriculum();
 syncPullSilent();
+/* 另一台设备改了数据：回到页面或每 2 分钟自动合并一次 */
+setInterval(function(){ if(!document.hidden)syncPullSilent(true); },120000);
+document.addEventListener('visibilitychange',function(){ if(!document.hidden)syncPullSilent(true); });
 setInterval(function(){
   autoCloseOverdue();
   var d=todayStr();
