@@ -546,11 +546,9 @@ function mergeRemote(remote){
     var rd=remote.days[d], ld=state.days[d];
     if(!ld){ state.days[d]=rd; changed=true; return; }
     if(!rd)return;
-    var rs=rd.submittedAt||'', ls=ld.submittedAt||'';
-    if(rd.submitted&&!ld.submitted){ state.days[d]=rd; changed=true; return; }
-    if(rd.submitted&&ld.submitted&&rs>ls){ state.days[d]=rd; changed=true; return; }
-    if((!ld.plan||!ld.plan.length)&&rd.plan&&rd.plan.length){ state.days[d]=rd; changed=true; return; }
-    /* 两边都还没盖章：按任务逐项合并，勾选取并、分钟取大、时间取新 */
+    /* 计划：谁有内容用谁的 */
+    if((!ld.plan||!ld.plan.length)&&rd.plan&&rd.plan.length){ ld.plan=rd.plan; changed=true; }
+    /* 无论是否已盖章，都按任务逐项合并：勾选取并、替换取并、分钟取大、时间取新 */
     ld.items=ld.items||{};
     Object.keys(rd.items||{}).forEach(function(tid){
       var a=ld.items[tid], b=rd.items[tid];
@@ -566,6 +564,17 @@ function mergeRemote(remote){
       var dup=ld.extras.some(function(y){return y.ref===x.ref&&Number(y.minutes||0)===Number(x.minutes||0);});
       if(!dup){ld.extras.push(x);changed=true;}
     });
+    /* 任一边已盖章就视为已盖章，提交时间取更早的真实一次 */
+    if(rd.submitted&&!ld.submitted){ld.submitted=true;ld.auto=rd.auto;changed=true;}
+    if(rd.submittedAt&&(!ld.submittedAt||rd.submittedAt<ld.submittedAt)){ld.submittedAt=rd.submittedAt;changed=true;}
+    /* 已盖章的按合并后的勾选重算，避免旧设备的 0 分覆盖真分数 */
+    if(ld.submitted){
+      var oldv=ld.score+'/'+ld.completion;
+      var rr=scoreDay(ld);
+      ld.score=rr.score; ld.completion=rr.completion;
+      if(!ld.comment)ld.comment=commentFor(rr);
+      if(oldv!==ld.score+'/'+ld.completion)changed=true;
+    }
   });
   state.done=state.done||{};
   Object.keys(remote.done||{}).forEach(function(id){
