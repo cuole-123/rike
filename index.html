@@ -475,10 +475,69 @@ try{
   if((state.curVersion||1)<2){state.curriculum=JSON.parse(JSON.stringify(DEFAULT_CURRICULUM));state.curVersion=2;}
   if(!state.journey)state.journey={total:0,start:null,days:{}};
 }catch(e){state=defaultState();}
-function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
+function save(){
+  try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){}
+  try{ if(typeof scheduleSync==='function') scheduleSync(); }catch(e){}
+}
 
 /* 课程表外置在 curriculum.json：我改文件 → 版本号+1 → 手机刷新自动拉到新内容，
    打卡记录（done/days/journey）完全不受影响 */
+/* ============ 云同步（私有仓库 rike-data） ============ */
+var syncTimer=null, syncBusy=false;
+function syncCfg(){
+  if(!state.settings)state.settings={};
+  if(!state.settings.sync)state.settings.sync={token:'',repo:'cuole-123/rike-data',enabled:false,lastAt:0};
+  return state.settings.sync;
+}
+function b64utf8(s){ return btoa(unescape(encodeURIComponent(s))); }
+function scheduleSync(){
+  var c=syncCfg();
+  if(!c.enabled||!c.token||syncBusy)return;
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(function(){ syncUpload(true); },8000);
+}
+function syncUpload(silent){
+  var c=syncCfg();
+  if(!c.token||!c.repo){ if(!silent)toast('先填令牌'); return; }
+  syncBusy=true;
+  var body=JSON.stringify(state);
+  var url='https://api.github.com/repos/'+c.repo+'/contents/state.json';
+  var h={'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json'};
+  fetch(url,{headers:h})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(meta){
+      var payload={message:'sync '+new Date().toISOString(),content:b64utf8(body),branch:'main'};
+      if(meta&&meta.sha)payload.sha=meta.sha;
+      return fetch(url,{method:'PUT',headers:h,body:JSON.stringify(payload)});
+    })
+    .then(function(r){
+      if(r&&r.ok){
+        c.lastAt=Date.now(); save();
+        if(!silent)toast('已上传到云端');
+        var el=document.getElementById('syncStat');
+        if(el)el.textContent='上次上传 '+new Date(c.lastAt).toLocaleString();
+      } else if(!silent){ toast('上传失败，检查令牌权限'); }
+    })
+    .catch(function(){ if(!silent)toast('上传失败，检查网络'); })
+    .then(function(){ syncBusy=false; });
+}
+function syncPull(){
+  var c=syncCfg();
+  if(!c.token||!c.repo){ toast('先填令牌'); return; }
+  var url='https://api.github.com/repos/'+c.repo+'/contents/state.json';
+  fetch(url,{headers:{'Authorization':'Bearer '+c.token,'Accept':'application/vnd.github+json'}})
+    .then(function(r){ return r.ok?r.json():null; })
+    .then(function(meta){
+      if(!meta){ toast('云端还没有数据'); return; }
+      var txt=decodeURIComponent(escape(atob(meta.content.replace(/\s/g,''))));
+      if(!confirm('用云端数据覆盖本机？本机当前记录会丢失。'))return;
+      syncBusy=true;
+      state=JSON.parse(txt);
+      save(); location.reload();
+    })
+    .catch(function(){ toast('读取失败'); });
+}
+
 function syncCurriculum(){
   try{
     fetch('curriculum.json?t='+Date.now(),{cache:'no-store'})
@@ -1619,6 +1678,20 @@ function renderSettings(){
       '<textarea id="curBox" spellcheck="false">'+esc(JSON.stringify(state.curriculum,null,2))+'</textarea>'+
       '<button class="ghostbtn" id="curSave">保存课程表</button>'+
       '<button class="ghostbtn" id="curReset" style="border-color:#E7E2D8;color:#9A948A">恢复默认</button>'+
+      '<div class="seclbl" style="margin-top:26px">云同步 · 私有仓库</div>'+
+      '<div class="pct" style="margin-bottom:10px">令牌只存在这台设备的浏览器里，不会出现在网页源码中。</div>'+
+      '<div style="margin-bottom:12px"><div class="fl">GitHub 令牌（fine-grained，仅 rike-data 的 Contents 读写）</div>'+
+        '<input id="tokIn" type="password" class="txt" placeholder="github_pat_..." value="'+esc(syncCfg().token||'')+'"></div>'+
+      '<div style="margin-bottom:12px"><div class="fl">仓库</div>'+
+        '<input id="repoIn" class="txt" value="'+esc(syncCfg().repo||'cuole-123/rike-data')+'"></div>'+
+      '<label class="swbox"><input type="checkbox" id="syncOn" '+(syncCfg().enabled?'checked':'')+'>'+
+        '<span>自动上传（每次改动 8 秒后）</span></label>'+
+      '<button class="ghostbtn" id="syncNow">立即上传</button>'+
+      '<button class="ghostbtn" id="syncSave" style="border-color:#E7E2D8">保存令牌设置</button>'+
+      '<button class="ghostbtn" id="syncPull" style="border-color:#E7E2D8;color:#9A948A">从云端恢复</button>'+
+      '<div class="pct" id="syncStat" style="margin-top:10px">'+
+        (syncCfg().lastAt?('上次上传 '+new Date(syncCfg().lastAt).toLocaleString()):'还没上传过')+'</div>'+
+
       '<div class="seclbl" style="margin-top:26px">数据</div>'+
       '<div class="pct" style="margin-bottom:11px">记录存在本机浏览器，不上传。</div>'+
       '<button class="ghostbtn" id="expBtn">导出备份</button>'+
@@ -1644,6 +1717,16 @@ function renderSettings(){
       state.curriculum=JSON.parse(JSON.stringify(DEFAULT_CURRICULUM));
       delete state.days[todayStr()];save();renderSettings();toast('已恢复默认');
     };
+    document.getElementById('syncSave').onclick=function(){
+      var c=syncCfg();
+      c.token=(document.getElementById('tokIn').value||'').trim();
+      c.repo=(document.getElementById('repoIn').value||'cuole-123/rike-data').trim();
+      c.enabled=document.getElementById('syncOn').checked;
+      save(); toast('已保存');
+    };
+    document.getElementById('syncNow').onclick=function(){ syncUpload(false); };
+    document.getElementById('syncPull').onclick=syncPull;
+
     document.getElementById('expBtn').onclick=function(){
       var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
       var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rike-'+todayStr()+'.json';a.click();
