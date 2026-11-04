@@ -64,6 +64,9 @@ li.task:last-child{border-bottom:0}
 li.task.done{opacity:.38}
 li.task.done .ref{text-decoration:line-through}
 .ck{display:none}
+.msel{width:22px;height:22px;flex:0 0 22px;border:1px solid var(--line);border-radius:3px;display:grid;place-items:center;
+  font-size:12px;color:var(--seal);margin-top:2px;background:#fff}
+li.task.sel{background:#FCF6F4}
 .task .body{flex:1;min-width:0}
 .chips{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:5px}
 .chip{font-size:9.5px;padding:1px 7px;border:1px solid var(--line);border-radius:2px;color:var(--ink2);letter-spacing:.1em}
@@ -564,6 +567,17 @@ function mergeRemote(remote){
       var dup=ld.extras.some(function(y){return y.ref===x.ref&&Number(y.minutes||0)===Number(x.minutes||0);});
       if(!dup){ld.extras.push(x);changed=true;}
     });
+    /* 合并替换条目取并集，并把对应任务标成已合并，避免两台设备各显示一套 */
+    ld.merges=ld.merges||[];
+    (rd.merges||[]).forEach(function(m){
+      if(!ld.merges.some(function(x){return x.id===m.id;})){
+        ld.merges.push(m); changed=true;
+      }
+      (m.taskIds||[]).forEach(function(tid){
+        var it=ld.items[tid]||{};
+        if(!it.mergedId){it.mergedId=m.id;it.replaced=true;it.minutes=0;changed=true;}
+      });
+    });
     /* 任一边已盖章就视为已盖章，提交时间取更早的真实一次 */
     if(rd.submitted&&!ld.submitted){ld.submitted=true;ld.auto=rd.auto;changed=true;}
     if(rd.submittedAt&&(!ld.submittedAt||rd.submittedAt<ld.submittedAt)){ld.submittedAt=rd.submittedAt;changed=true;}
@@ -741,6 +755,7 @@ function scoreDay(day){
   });
   var completion=planBase?doneBase/planBase:0, eff=0;
   if(doneCount&&actual>0){eff=clamp(doneEst/actual/1.15,0,1);}
+  (day.merges||[]).forEach(function(m){repMin+=Number(m.minutes||0);});
   var exMin=repMin;
   (day.extras||[]).forEach(function(x){exMin+=Number(x.minutes||0);});
   var bnMin=0;
@@ -830,6 +845,8 @@ function poemFor(dstr){
 
 /* ============ 渲染：今日 ============ */
 var curDate=todayStr();
+var multiSel={on:false,ids:{},date:null};
+var mergeCtx={ids:{},minutes:0};
 
 function bonusHtml(day){
   var list=(day.bonus||[]).filter(function(b){
@@ -855,13 +872,19 @@ function bonusHtml(day){
 
 function extrasHtml(day){
   var ex=day.extras||[];
+  var mgs=day.merges||[];
   var reps=[];
   day.plan.forEach(function(id){
     var it=day.items[id]||{};
-    if(it.replaced){var t=taskById(id);reps.push({ref:t?t.ref:id,custom:it.customRef,minutes:it.minutes});}
+    if(it.replaced&&!it.mergedId){var t=taskById(id);reps.push({ref:t?t.ref:id,custom:it.customRef,minutes:it.minutes});}
   });
-  if(!ex.length&&!reps.length)return '';
+  if(!ex.length&&!reps.length&&!mgs.length)return '';
   var s='';
+  mgs.forEach(function(m){
+    s+='<div class="extras"><div class="eh">合并替换（'+m.taskIds.length+' 项 → 1 项）</div>'+
+      '<div class="ei"><b>'+esc(m.ref)+'</b><em>'+m.minutes+' 分钟</em>'+
+      '<button class="rm" data-mgdel="'+m.id+'">×</button></div></div>';
+  });
   if(reps.length){
     s+='<div class="extras"><div class="eh">替换（原任务已过关，不计入今日完成）</div>';
     reps.forEach(function(x){
@@ -989,6 +1012,59 @@ function applyEdit(){
   save();closeEdit();renderSheet();
   try{navigator.vibrate&&navigator.vibrate(14);}catch(e){}
   toast('记下了');
+}
+
+/* ============ 合并替换：多条 → 一条 ============ */
+function openMerge(){
+  var ids=Object.keys(multiSel.ids);
+  if(ids.length<2){toast('至少选两条');return;}
+  mergeCtx.ids={}; ids.forEach(function(id){mergeCtx.ids[id]=true;});
+  var sum=0;
+  ids.forEach(function(id){var t=taskById(id);if(t)sum+=estMin(t);});
+  mergeCtx.minutes=sum;
+  document.getElementById('editmodal').classList.remove('hidden');
+  renderMergeSheet();
+}
+function renderMergeSheet(){
+  var ids=Object.keys(mergeCtx.ids);
+  var list=ids.map(function(id){
+    var t=taskById(id);
+    return '<div class="mref" style="margin:4px 0"><s style="color:var(--ink3)">'+esc(t?t.ref:id)+'</s></div>';
+  }).join('');
+  document.getElementById('msheetEdit').innerHTML='<div class="mtitle">合并替换</div>'+
+    '<div class="pct" style="margin-bottom:10px">把下面 '+ids.length+' 条合并成一件新的事。原任务记为完成，本次不计入完成率。</div>'+
+    list+
+    '<div class="fl" style="margin-top:16px">新的这件事</div>'+
+    '<input id="mgRef" class="txt" placeholder="例如：整理行列式题型 / 做一套综合卷">'+
+    '<div class="fl" style="margin-top:16px">用时</div>'+
+    '<div class="mrow" style="margin-top:4px"><input id="mgMin" type="number" min="0" max="600" step="5" value="'+mergeCtx.minutes+'"><span>分钟</span></div>'+
+    '<label class="swbox"><input type="checkbox" id="mgAdv" checked><span>原任务记为完成，进度前进</span></label>'+
+    '<div class="mbtns"><button class="mno" id="mgCancel">算了</button><button class="mok" id="mgOk">合并</button></div>';
+  document.getElementById('mgCancel').onclick=closeEdit;
+  document.getElementById('mgOk').onclick=applyMerge;
+}
+function applyMerge(){
+  var day=state.days[curDate];if(!day)return;
+  var ids=Object.keys(mergeCtx.ids);
+  if(ids.length<2){toast('至少选两条');return;}
+  var ref=(document.getElementById('mgRef').value||'').trim()||'合并任务';
+  var minutes=Number(document.getElementById('mgMin').value)||0;
+  var adv=document.getElementById('mgAdv').checked;
+  var mid='mg'+Date.now();
+  day.merges=day.merges||[];
+  day.merges.push({id:mid,ref:ref,minutes:minutes,taskIds:ids,at:Date.now()});
+  ids.forEach(function(id){
+    day.items[id]=day.items[id]||{};
+    day.items[id].replaced=true;
+    day.items[id].mergedId=mid;
+    day.items[id].minutes=0;
+    delete day.items[id].customRef;
+    if(adv)state.done[id]=curDate; else delete state.done[id];
+  });
+  multiSel={on:false,ids:{},date:curDate};
+  save();closeEdit();renderSheet();
+  try{navigator.vibrate&&navigator.vibrate(14);}catch(e){}
+  toast('已合并 '+ids.length+' 项');
 }
 
 var ashRAF=null;
@@ -1174,6 +1250,7 @@ function cheer(){
 function renderSheet(){
   try{
     var dstr=curDate, isToday=dstr===todayStr(), isFuture=dstr>todayStr();
+    if(multiSel.date&&multiSel.date!==dstr){multiSel={on:false,ids:{},date:null};}
     var d=parseD(dstr), day=isToday?ensureDay(dstr):state.days[dstr];
     var pm=poemFor(dstr);
 
@@ -1195,8 +1272,10 @@ function renderSheet(){
       var s=subjOf(ch.subject), e=estMin(t);totalEst+=e;
       var it=day.items[id]||{}, mins=(it.minutes!=null)?it.minutes:e;
       if(it.done){doneN++;actSum+=Number(mins);return;}
+      if(it.mergedId)return;                    /* 已合并的任务由合并条目代表 */
       var custom=it.customRef||'';
       var replaced=!!it.replaced;
+      if(multiSel.on&&replaced)return;          /* 合并模式只选未替换的 */
       var refHtml;
       if(replaced){
         refHtml='<div class="ref" style="color:var(--ink3)"><s>'+esc(t.ref)+'</s></div>'+
@@ -1205,20 +1284,22 @@ function renderSheet(){
       }else{
         refHtml='<div class="ref">'+esc(t.ref)+'</div>';
       }
-      rows.push('<li class="task sw'+(replaced?' replaced':'')+'" data-id="'+id+'">'+
+      var sel=!!(multiSel.on&&multiSel.ids[id]);
+      rows.push('<li class="task sw'+(replaced?' replaced':'')+(sel?' sel':'')+'" data-id="'+id+'"'+(multiSel.on?' data-msel="'+id+'"':'')+'>'+
+        (multiSel.on?'<span class="msel">'+(sel?'✓':'')+'</span>':'')+
         (replaced?'<span class="repdot">⇄</span>':'')+
         '<div class="body"><div class="chips"><span class="chip '+s.cls+'">'+s.name+'</span>'+
         '<span class="chip">'+(TYPE_LABEL[t.type]||t.type)+'</span>'+
         (t.diff?'<span class="stars">'+'★'.repeat(t.diff)+'</span>':'')+'</div>'+
         refHtml+
         (t.tip&&!replaced?'<div class="tip">↳ '+esc(t.tip)+'</div>':'')+
-        (!replaced?'<div class="meter"><span>预计</span><input type="number" min="0" max="600" step="5" value="'+mins+'" data-min="'+id+'"><span>分钟</span></div>':'')+
-        '<div class="acts">'+
+        (!multiSel.on&&!replaced?'<div class="meter"><span>预计</span><input type="number" min="0" max="600" step="5" value="'+mins+'" data-min="'+id+'"><span>分钟</span></div>':'')+
+        (!multiSel.on?'<div class="acts">'+
           (replaced
             ? '<button class="linkbtn" data-unrep="'+id+'">取消替换</button><button class="linkbtn" data-rep="'+id+'">改内容</button>'
             : '<button class="linkbtn" data-rep="'+id+'">替换这条</button>')+
-        '</div>'+
-        '</div>'+(replaced?'':'<span class="swact">完成</span>')+'</li>');
+        '</div>':'')+
+        '</div>'+((replaced||multiSel.on)?'':'<span class="swact">完成</span>')+'</li>');
     });
 
     document.getElementById('sheet').innerHTML=head+
@@ -1241,7 +1322,11 @@ function renderSheet(){
         '左滑一条任务，划掉即完成</div>'+
       extrasHtml(day)+
       '<div class="addbar">'+
-        '<button id="addExtraBtn">＋ 记一笔（计划外 / 替换）</button>'+
+        (multiSel.on
+          ? '<button id="mergeBtn"'+(Object.keys(multiSel.ids).length<2?' disabled style="opacity:.45"':'')+'>合并替换（已选 '+Object.keys(multiSel.ids).length+' 项）</button>'+
+            '<button id="mergeCancel">取消</button>'
+          : '<button id="addExtraBtn">＋ 记一笔（计划外 / 替换）</button>'+
+            '<button id="mergeToggle">⇄ 合并替换</button>')+
       '</div>'+
 
       '<div class="sum"><div><div class="k">预计</div><div class="v" id="sumEst">'+totalEst+'<small> min</small></div></div>'+
@@ -1255,6 +1340,21 @@ function renderSheet(){
 
 function bindSheet(){
   var day=state.days[curDate];if(!day)return;
+  if(multiSel.on){
+    Array.prototype.forEach.call(document.querySelectorAll('[data-msel]'),function(el){
+      el.onclick=function(e){
+        e.preventDefault();
+        var id=el.getAttribute('data-msel');
+        if(multiSel.ids[id])delete multiSel.ids[id]; else multiSel.ids[id]=true;
+        renderSheet();
+      };
+    });
+    var mb=document.getElementById('mergeBtn');
+    if(mb)mb.onclick=openMerge;
+    var mc=document.getElementById('mergeCancel');
+    if(mc)mc.onclick=function(){multiSel={on:false,ids:{},date:curDate};renderSheet();};
+    return;
+  }
   Array.prototype.forEach.call(document.querySelectorAll('li.task.sw'),function(el){
     attachSwipe(el,el.getAttribute('data-id'));
   });
@@ -1292,6 +1392,22 @@ function bindSheet(){
   });
   var ab=document.getElementById('addExtraBtn');
   if(ab)ab.onclick=function(){openEdit(null,'extra');};
+  var mt=document.getElementById('mergeToggle');
+  if(mt)mt.onclick=function(){multiSel={on:true,ids:{},date:curDate};renderSheet();};
+  Array.prototype.forEach.call(document.querySelectorAll('[data-mgdel]'),function(el){
+    el.onclick=function(){
+      var mid=el.getAttribute('data-mgdel');
+      var m=(day.merges||[]).filter(function(x){return x.id===mid;})[0];
+      if(!m)return;
+      m.taskIds.forEach(function(tid){
+        var it=day.items[tid]||{};
+        delete it.replaced;delete it.mergedId;delete it.customRef;
+        if(state.done[tid]===curDate)delete state.done[tid];
+      });
+      day.merges=day.merges.filter(function(x){return x.id!==mid;});
+      save();renderSheet();toast('已取消合并');
+    };
+  });
 
   var sb=document.getElementById('submitBtn');
   if(sb)sb.onclick=doSubmit;
