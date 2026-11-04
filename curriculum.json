@@ -251,6 +251,22 @@
       "title": "第2章 §2.6 行列式按 k 行展开",
       "tasks": [
         {
+          "id": "gd-c3-v01",
+          "type": "video",
+          "ref": "第 017 讲 3阶行列式几何意义、k阶子式、行列式按 k 行展开（一）",
+          "baseMin": 8,
+          "vidMin": 24,
+          "diff": 2
+        },
+        {
+          "id": "gd-c3-v02",
+          "type": "video",
+          "ref": "第 018 讲 行列式按 k 行展开（二）",
+          "baseMin": 8,
+          "vidMin": 23,
+          "diff": 2
+        },
+        {
           "id": "gd-c3-01",
           "type": "note",
           "ref": "§2.6 讲义：Laplace 定理 + 推论 |A 0;C B|=|A||B|",
@@ -350,7 +366,7 @@
       ]
     }
   ],
-  "version": 7,
+  "version": 8,
   "defaults": {
     "dailyTarget": 270
   }
