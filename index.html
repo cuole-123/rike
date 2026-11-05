@@ -549,8 +549,10 @@ function mergeRemote(remote){
     var rd=remote.days[d], ld=state.days[d];
     if(!ld){ state.days[d]=rd; changed=true; return; }
     if(!rd)return;
-    /* 计划：谁有内容用谁的 */
-    if((!ld.plan||!ld.plan.length)&&rd.plan&&rd.plan.length){ ld.plan=rd.plan; changed=true; }
+    /* 计划：云端标记重算时直接采用云端计划（保留本机已勾选的 items） */
+    if(rd.replan&&!ld.submitted&&rd.plan&&rd.plan.length){
+      if(JSON.stringify(ld.plan||[])!==JSON.stringify(rd.plan)){ld.plan=rd.plan;changed=true;}
+    } else if((!ld.plan||!ld.plan.length)&&rd.plan&&rd.plan.length){ ld.plan=rd.plan; changed=true; }
     /* 无论是否已盖章，都按任务逐项合并：勾选取并、替换取并、分钟取大、时间取新 */
     ld.items=ld.items||{};
     Object.keys(rd.items||{}).forEach(function(tid){
