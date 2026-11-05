@@ -596,6 +596,17 @@ function mergeRemote(remote){
   Object.keys(remote.done||{}).forEach(function(id){
     if(!state.done[id]){ state.done[id]=remote.done[id]; changed=true; }
   });
+  /* 旧设备可能带着错误进度：凡明确“不过关”的替换项，从 done 里撤掉 */
+  Object.keys(state.days).forEach(function(d){
+    var day=state.days[d];
+    if(!day||!day.items)return;
+    Object.keys(day.items).forEach(function(id){
+      var it=day.items[id];
+      if(it&&it.replaced&&it.advance===false&&state.done[id]===d){
+        delete state.done[id]; changed=true;
+      }
+    });
+  });
   state.journey=state.journey||{total:0,start:null,days:{}};
   state.journey.days=state.journey.days||{};
   if(remote.journey&&remote.journey.start&&!state.journey.start){state.journey.start=remote.journey.start;changed=true;}
