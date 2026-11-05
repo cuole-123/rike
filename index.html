@@ -558,6 +558,8 @@ function mergeRemote(remote){
       if(!a){ ld.items[tid]=b; changed=true; return; }
       if(b.done&&!a.done){a.done=true;changed=true;}
       if(b.replaced&&!a.replaced){a.replaced=true;if(b.customRef)a.customRef=b.customRef;changed=true;}
+      if(b.advance===false)a.advance=false;
+      else if(a.advance===undefined&&b.advance!==undefined)a.advance=b.advance;
       var bm=Number(b.minutes||0), am=Number(a.minutes||0);
       if(bm>am){a.minutes=b.minutes;changed=true;}
       if(b.at&&(!a.at||b.at>a.at)){a.at=b.at;changed=true;}
@@ -828,7 +830,8 @@ function autoCloseOverdue(){
     day.submittedAt=new Date().toISOString();
     day.plan.forEach(function(id){
       var it=day.items[id]||{};
-      if(it.replaced||it.done)state.done[id]=d;
+      if(it.done||(it.replaced&&it.advance!==false))state.done[id]=d;
+      else if(state.done[id]===d)delete state.done[id];
     });
     var st=stepsFor(r);
     if(st>0&&state.journey)state.journey.days[d]=st;
@@ -1000,6 +1003,7 @@ function applyEdit(){
     day.items[editCtx.orig].replaced=true;
     day.items[editCtx.orig].customRef=content;
     day.items[editCtx.orig].minutes=minutes;
+    day.items[editCtx.orig].advance=!!editCtx.advance;
     if(editCtx.advance)state.done[editCtx.orig]=curDate;
     else delete state.done[editCtx.orig];
   }else{
@@ -1058,6 +1062,7 @@ function applyMerge(){
     day.items[id].replaced=true;
     day.items[id].mergedId=mid;
     day.items[id].minutes=0;
+    day.items[id].advance=!!adv;
     delete day.items[id].customRef;
     if(adv)state.done[id]=curDate; else delete state.done[id];
   });
@@ -1379,7 +1384,7 @@ function bindSheet(){
     el.onclick=function(){
       var id=el.getAttribute('data-unrep');
       var it=day.items[id]||{};
-      delete it.replaced; delete it.customRef; it.done=false;
+      delete it.replaced; delete it.customRef; delete it.advance; it.done=false;
       if(state.done[id]===curDate)delete state.done[id];
       save();renderSheet();toast('已恢复原任务');
     };
@@ -1401,7 +1406,7 @@ function bindSheet(){
       if(!m)return;
       m.taskIds.forEach(function(tid){
         var it=day.items[tid]||{};
-        delete it.replaced;delete it.mergedId;delete it.customRef;
+        delete it.replaced;delete it.mergedId;delete it.customRef;delete it.advance;
         if(state.done[tid]===curDate)delete state.done[tid];
       });
       day.merges=day.merges.filter(function(x){return x.id!==mid;});
@@ -1435,7 +1440,8 @@ function doSubmit(){
   day.submitted=true;day.submittedAt=new Date().toISOString();
   day.plan.forEach(function(id){
     var it=day.items[id]||{};
-    if(it.replaced||it.done)state.done[id]=curDate;else delete state.done[id];
+    if(it.done||(it.replaced&&it.advance!==false))state.done[id]=curDate;
+    else if(state.done[id]===curDate)delete state.done[id];
   });
   save();
   stamp(r.score);
