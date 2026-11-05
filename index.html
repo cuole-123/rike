@@ -591,7 +591,12 @@ function mergeRemote(remote){
       var rr=scoreDay(ld);
       ld.score=rr.score; ld.completion=rr.completion;
       if(!ld.comment)ld.comment=commentFor(rr);
-      if(oldv!==ld.score+'/'+ld.completion)changed=true;
+      if(oldv!==ld.score+'/'+ld.completion){
+        if(!state.journey)state.journey={total:0,start:null,days:{}};
+        if(!state.journey.days)state.journey.days={};
+        state.journey.days[d]=stepsFor(rr);
+        changed=true;
+      }
     }
   });
   state.done=state.done||{};
@@ -764,7 +769,12 @@ function scoreDay(day){
   day.plan.forEach(function(id){
     var t=taskById(id);if(!t)return;
     var it=day.items[id]||{}, e=estMin(t);
-    if(it.replaced){ repMin+=Number(it.minutes||e); return; }   /* 替换：不计入今日计划 */
+    if(it.replaced){
+      repMin+=Number(it.minutes!=null?it.minutes:e);
+      /* 没勾“原任务算过关”的替换项，仍然算今天没完成，进分母 */
+      if(it.advance===false){planBase+=t.baseMin;planCount++;}
+      return;
+    }
     planBase+=t.baseMin;planEst+=e;planCount++;
     if(it.done){doneBase+=t.baseMin;doneCount++;doneEst+=e;actual+=Number(it.minutes||e);}
   });
