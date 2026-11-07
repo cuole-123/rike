@@ -1,6 +1,13 @@
 {
-  "count": 12,
+  "count": 13,
   "items": [
+    {
+      "date": "2026-11-07",
+      "issue": "13",
+      "title": "内容重要｜费马进了 Lean，Navier–Stokes 还没有",
+      "excerpt": "2026-11-07 星期六 2026 年 9 月，两条并排的新闻。Anthropic 宣布一个模型完成了费马大定理的第一个完整 Lean 形式化，约 1340 万行，Buzzar",
+      "file": "reports/report-2026-11-07.md"
+    },
     {
       "date": "2026-11-06",
       "issue": "12",
