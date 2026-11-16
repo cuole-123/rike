@@ -119,21 +119,59 @@
         },
         {
           "id": "sf-c2-02",
-          "type": "exercise",
-          "ref": "练习题 2.4 第 1–4 题",
-          "baseMin": 40,
-          "count": 4,
-          "diff": 2
-        },
-        {
-          "id": "sf-c2-03",
           "type": "note",
           "ref": "费曼讲义：函数极限的概念",
           "baseMin": 45,
-          "diff": 2
+          "diff": 2,
+          "tip": "讲给外行听：ε-δ 说的就是“你要多近，我都能给多近”"
+        },
+        {
+          "id": "sf-c2-03",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 1 题（用 ε-δ 表述 lim f(x)=1）",
+          "baseMin": 6,
+          "count": 1,
+          "diff": 1,
+          "tip": "先写 0<|x−x0|<δ 再写 |f(x)−1|<ε；0< 不能丢，x=x0 处不参与"
         },
         {
           "id": "sf-c2-04",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 2 题（两侧极限存在 ⟺ 双侧极限存在）",
+          "baseMin": 12,
+          "count": 1,
+          "diff": 2,
+          "tip": "充分性取 δ=min(δ₋,δ₊)；必要性对同一 ε 分别取左右 δ"
+        },
+        {
+          "id": "sf-c2-05",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 3 题（|f|、f²、1/f、√f 的 ε-δ 证明）",
+          "baseMin": 13,
+          "count": 4,
+          "diff": 3,
+          "tip": "1/f 先用保号性得 |f|>A/2；√f 用 |√f−√A|=|f−A|/(√f+√A)"
+        },
+        {
+          "id": "sf-c2-06",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 4 题（5 个 ε-δ 证明小题）",
+          "baseMin": 24,
+          "count": 5,
+          "diff": 3,
+          "tip": "(1) |x³−8|=|x−2|(x²+2x+4)≤19|x−2|（限 |x−2|<1），取 δ=min(1,ε/19)；其余小题题面待核，同法先分解再放大"
+        },
+        {
+          "id": "sf-c2-07",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 5 题（分段函数左右极限与参数 a）",
+          "baseMin": 12,
+          "count": 1,
+          "diff": 2,
+          "tip": "左右分支分别代值算 f(2−)、f(2+)；极限存在等价于两者相等，用它解 a。分段式待核"
+        },
+        {
+          "id": "sf-c2-08",
           "type": "video",
           "ref": "第 022 讲 Heine 归结原理",
           "baseMin": 30,
@@ -141,19 +179,93 @@
           "diff": 2
         },
         {
-          "id": "sf-c2-05",
+          "id": "sf-c2-09",
           "type": "exercise",
-          "ref": "练习题 2.4 第 5、8、9、10 题",
-          "baseMin": 45,
-          "count": 4,
-          "diff": 2
+          "ref": "练习题 2.4 第 6 题（保号性的局部形式）",
+          "baseMin": 7,
+          "count": 1,
+          "diff": 2,
+          "tip": "取 ε=A/2 即得邻域内 f(x)>A/2；别写成整段恒正"
         },
         {
-          "id": "sf-c2-06",
+          "id": "sf-c2-10",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 7 题（单侧极限不等 ⇒ 局部不等式）",
+          "baseMin": 9,
+          "count": 1,
+          "diff": 3,
+          "tip": "左右各取 ε=(f(x0+)−f(x0−))/3，再把两个 δ 取小；结论方向待核"
+        },
+        {
+          "id": "sf-c2-11",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 8 题（单调 + 数列逼近 ⇒ 单侧极限）",
+          "baseMin": 9,
+          "count": 1,
+          "diff": 3,
+          "tip": "用单调性把任意 x<x0 夹在 x_n 与 x0 之间，再令 n→∞"
+        },
+        {
+          "id": "sf-c2-12",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 9 题（用肯定语气写出“不收敛于 A”）",
+          "baseMin": 6,
+          "count": 1,
+          "diff": 2,
+          "tip": "∀∃ 全部对调：∃ε₀>0，∀δ>0，∃x 使 0<|x−x0|<δ 而 |f(x)−A|≥ε₀"
+        },
+        {
+          "id": "sf-c2-13",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 10 题（有限集 A_n 上的函数列极限）",
+          "baseMin": 12,
+          "count": 1,
+          "diff": 3,
+          "tip": "A_n 递减到空集 ⇒ 每个 x 只属于有限多个 A_n，故最终 f_n(x)=0。题面细节待核"
+        },
+        {
+          "id": "sf-c2-14",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 11 题（计算极限，10 个小题）",
+          "baseMin": 20,
+          "count": 10,
+          "diff": 2,
+          "tip": "多为 1^∞ 型：先取对数或用 (1+1/n)^n→e；小题公式未逐条录入（待核），做完对答案标错题"
+        },
+        {
+          "id": "sf-c2-15",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 12 题（求极限，含取整函数，4 个小题）",
+          "baseMin": 12,
+          "count": 4,
+          "diff": 2,
+          "tip": "夹逼：[x]≤x<[x]+1；x→2± 时 [x] 取值不同，左右分开算"
+        },
+        {
+          "id": "sf-c2-16",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 13 题（lim sin(2πn!e)）",
+          "baseMin": 8,
+          "count": 1,
+          "diff": 3,
+          "tip": "n!e=整数+n!·Σ_{k>n}1/k!，余项 <1/(n+1)，故 sin≈2π/(n+1) → 0"
+        },
+        {
+          "id": "sf-c2-17",
+          "type": "exercise",
+          "ref": "练习题 2.4 第 14 题（Dirichlet 反例：复合极限为何失效）",
+          "baseMin": 10,
+          "count": 1,
+          "diff": 3,
+          "tip": "定理 2.8 要求 g 在去心邻域内不取 g(x0)；Dirichlet 函数在任意邻域都取到 0，条件破"
+        },
+        {
+          "id": "sf-c2-18",
           "type": "note",
           "ref": "费曼讲义：Heine 归结原理",
           "baseMin": 40,
-          "diff": 2
+          "diff": 2,
+          "tip": "用“任何走法都到同一处”来解释：数列就是走向 x0 的一条条路径"
         }
       ]
     },
@@ -366,7 +478,7 @@
       ]
     }
   ],
-  "version": 8,
+  "version": 9,
   "defaults": {
     "dailyTarget": 270
   }
