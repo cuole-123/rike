@@ -1340,7 +1340,7 @@ function bonusHtml(day){
          '<span class="chip '+s.cls+'">'+s.name+'</span>'+
          '<span class="chip">提前</span></div>'+
        '<div class="bref">'+esc(b.ref)+'</div>'+
-       '<div class="bmin">约 '+b.minutes+' 分钟 · 完成即推进度</div></div></div>';
+       '<div class="bmin">'+countLabel(taskById(b.id))+' · 完成即推进度</div></div></div>';
   });
   return h;
 }
