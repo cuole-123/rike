@@ -1164,6 +1164,8 @@ function generatePlan(){
 
   var ord={sf:0,gd:1,en:2};
   picked.sort(function(a,b){return (ord[a.ch.subject]-ord[b.ch.subject])||(a.ch.id===b.ch.id?a.i-b.i:0);});
+  var noteN=0;
+  picked=picked.filter(function(p){if(p.t.type==='note'){noteN++;return noteN<=1;}return true;});
   return picked.map(function(p){return p.t.id;});
 }
 /* 提前做：从计划之外的任务里取 3 项，完成即推进度（但不是今天必须做的） */
