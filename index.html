@@ -389,6 +389,35 @@ input.num:focus{outline:0;border-bottom-color:var(--seal)}
 .missrow .mr{flex:1;line-height:1.6}
 .missrow .mr small{color:var(--ink3);font-size:10px}
 
+
+/* ===== 全屏课堂页 ===== */
+#classroot{position:fixed;inset:0;z-index:160;background:var(--paper);display:flex;flex-direction:column;
+  padding:calc(16px + env(safe-area-inset-top)) 22px calc(24px + env(safe-area-inset-bottom))}
+#classroot.hidden{display:none}
+.cpage{width:100%;max-width:560px;margin:0 auto;flex:1;display:flex;flex-direction:column}
+.ctop{display:flex;align-items:center;gap:10px;font:600 10px var(--sans);letter-spacing:.16em;color:var(--ink3)}
+.ctop .cback{border:0;background:none;font:400 26px/1 var(--sans);color:var(--ink3);padding:0 6px 4px 0}
+.ctop .cblock{flex:1;text-align:center}
+.ctop .cstep{white-space:nowrap}
+.cmain{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px}
+.ckicker{font:500 10px var(--sans);letter-spacing:.2em;color:var(--ink3)}
+.ctimer{font:600 clamp(68px,21vw,112px)/1 var(--serif);font-variant-numeric:tabular-nums;color:var(--ink);letter-spacing:.01em}
+.ctimer.break{color:var(--teal)}
+.ctimer.done{color:var(--seal)}
+.ctitle{font:600 18px/1.5 var(--serif);color:var(--ink)}
+.csub{font:400 11px/1.8 var(--sans);color:var(--ink3);letter-spacing:.04em;max-width:300px}
+.creach{display:flex;align-items:baseline;gap:9px;border-bottom:1px solid var(--line);padding:4px 0;margin-top:2px;width:180px}
+.creach input{flex:1;border:0;background:transparent;font:600 24px/1 var(--serif);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums}
+.creach input:focus{outline:0}
+.creach span{font-size:9.5px;color:var(--ink3);letter-spacing:.08em}
+.cbtns{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.cbtn{padding:16px;border:1px solid var(--ink);border-radius:4px;background:var(--ink);color:var(--paper);
+  font:600 13px var(--sans);letter-spacing:.26em;text-indent:.26em}
+.cbtn.ghost{background:transparent;color:var(--ink2);border-color:var(--line);font-weight:500}
+.cbtn:disabled{opacity:.35}
+.cfoot{text-align:center;font-size:9.5px;color:var(--ink3);letter-spacing:.06em;line-height:1.8;margin-top:6px}
+
+body.classmode{overflow:hidden}
 </style>
 </head>
 <body>
@@ -419,6 +448,8 @@ input.num:focus{outline:0;border-bottom-color:var(--seal)}
 </div>
 
 <div id="stampl"><div class="stampbox" id="stampbox">92</div></div>
+
+<div id="classroot" class="hidden"><div class="cpage" id="classPage"></div></div>
 
 <div class="modal hidden" id="modal">
   <div class="msheet">
@@ -718,6 +749,7 @@ function syncPullSilent(quiet){
         if(!quiet)toast(localEmpty?'已从云端恢复记录':'已同步云端最新记录');
       }
       syncBusy=false; syncReady=true;
+      if(document.getElementById('classroot')&&!document.getElementById('classroot').classList.contains('hidden'))renderClassPage();
       if(changed)scheduleSync();
     })
     .catch(function(){ syncBusy=false; syncReady=true; });
@@ -895,7 +927,7 @@ function renderBlockCards(day){
 }
 function bindBlockCards(day){
   Array.prototype.forEach.call(document.querySelectorAll('[data-bstart]'),function(el){
-    el.onclick=function(){openClass(el.getAttribute('data-bstart'));};
+    el.onclick=function(){openClassPage(el.getAttribute('data-bstart'));};
   });
   Array.prototype.forEach.call(document.querySelectorAll('[data-bdone]'),function(el){
     el.onclick=function(){completeBlock(el.getAttribute('data-bdone'));};
@@ -956,6 +988,125 @@ function openMissed(bk,fromComplete){
     save();closeMissed();renderSheet();toast('已更新未完成项');
   };
 }
+function renderClassUI(){
+  var cr=document.getElementById('classroot');
+  if(cr&&!cr.classList.contains('hidden'))renderClassPage();
+  var cm=document.getElementById('classmodal');
+  if(cm&&!cm.classList.contains('hidden'))renderClassSheet();
+}
+function openClassPage(bk){
+  curBlock=bk;
+  var cr=document.getElementById('classroot');if(!cr)return;
+  cr.classList.remove('hidden');
+  document.body.classList.add('classmode');
+  try{history.pushState({class:bk},'','?class='+bk);}catch(e){}
+  renderClassPage();
+}
+function closeClassPage(){
+  var cr=document.getElementById('classroot');if(cr)cr.classList.add('hidden');
+  document.body.classList.remove('classmode');
+  document.title='日课';
+  try{history.replaceState({},'',location.pathname);}catch(e){}
+  renderSheet();
+}
+function autoBreakAfterClass(){
+  var day=state.days[curDate],s=day&&day.session;if(!s||s.phase!=='class')return;
+  var last=Number(s.cls)>=BLOCK_DEFS[s.block].classes.length-1;
+  if(last){
+    s.phase='done';s.endsAt=0;s.paused=false;s.remainMs=0;
+  }else{
+    var mins=BLOCK_DEFS[s.block].breaks[s.cls]||0;
+    if(mins>0){s.phase='break';s.endsAt=Date.now()+mins*60000;s.paused=false;s.remainMs=0;}
+    else{s.phase='breakEnd';s.endsAt=0;s.paused=false;s.remainMs=0;}
+  }
+  save();beep();renderClassUI();renderSheet();
+}
+function skipBreak(){
+  var day=state.days[curDate],s=day&&day.session;if(!s||s.phase!=='break')return;
+  s.phase='breakEnd';s.endsAt=0;s.paused=false;s.remainMs=0;
+  save();renderClassUI();renderSheet();
+}
+function renderClassPage(){
+  var bk=curBlock;if(!bk)return;
+  var day=state.days[curDate];if(!day)return;
+  var def=BLOCK_DEFS[bk];
+  var s=(day.session&&day.session.block===bk)?day.session:null;
+  var phase=s?s.phase:'idle';
+  var cls=s?Number(s.cls)||0:0;
+  var c=def.classes[cls]||def.classes[0];
+  var total=def.classes.length;
+  var timerClass='',timerText='00:00',title='',sub='',step='1/'+total;
+  if(!s||phase==='idle'){
+    c=def.classes[0];cls=0;phase='idle';step='1/'+total;
+    timerText=fmtTime(c.minutes*60000);
+    title='第 1 节 · '+c.title;
+    sub='预计 '+classTarget(day,bk,c)+classUnit(c)+' · 开始后自动计时';
+  }else if(phase==='class'){
+    timerText=fmtTime(sessionRemain(s));step=(cls+1)+'/'+total;
+    title='第 '+(cls+1)+' 节 · '+c.title;
+    sub='预计 '+classTarget(day,bk,c)+classUnit(c)+(s.paused?' · 已暂停':' · 正在上课');
+  }else if(phase==='break'){
+    timerClass=' break';timerText=fmtTime(sessionRemain(s));step=(cls+1)+'/'+total;
+    title='休息';
+    sub='第 '+(cls+1)+' 节下课 · 自动休息 '+def.breaks[cls]+' 分钟';
+  }else if(phase==='breakEnd'){
+    timerText=fmtTime(def.classes[cls+1].minutes*60000);step=((cls+2)<=total?cls+2:total)+'/'+total;
+    title='休息结束';
+    sub='第 '+(cls+2)+' 节 · '+def.classes[cls+1].title+' · 随时开始';
+  }else if(phase==='done'){
+    timerClass=' done';timerText='00:00';step=total+'/'+total;
+    title='本块完成';
+    sub='三节课都结束了';
+  }
+  var reach='';
+  if((phase==='class'||phase==='break'||phase==='breakEnd')&&(c.kind==='exercise'||c.kind==='words')){
+    reach='<div class="creach"><input id="cpReach" type="number" min="0" max="999" inputmode="numeric" value="'+classReached(day,bk,c.key)+'"><span>做到第几'+(c.kind==='words'?'个':'题')+'</span></div>';
+  }
+  var btns='';
+  function btn(id,text,cls){return '<button class="cbtn '+(cls||'')+'" id="'+id+'">'+text+'</button>';}
+  if(phase==='idle'){btns=btn('cpStart','开始第 1 节','');}
+  else if(phase==='class'){
+    if(s.paused)btns=btn('cpResume','继续','')+btn('cpEnd','提前下课','ghost');
+    else btns=btn('cpPause','暂停','')+btn('cpEnd','提前下课','ghost');
+  }else if(phase==='break'){
+    btns=btn('cpSkip','跳过休息','ghost');
+  }else if(phase==='breakEnd'){
+    btns=btn('cpNext','上第 '+(cls+2)+' 节','');
+  }else if(phase==='done'){
+    btns=btn('cpFinish','完成本块','')+btn('cpBack','返回日课','ghost');
+  }
+  var foot='';
+  if(phase==='idle')foot='上完自动休息，休息结束才出现下一节。';
+  else if(phase==='break')foot='休息结束后，第 '+(cls+2)+' 节的按钮才会出现。';
+  else if(phase==='breakEnd')foot='你可以现在上，也可以晚点再上。';
+  else if(phase==='done')foot='完成后回到日课，勾出没做完的小项。';
+  document.getElementById('classPage').innerHTML=
+    '<div class="ctop"><button class="cback" id="cpTopBack">‹</button><span class="cblock">'+def.name+' · '+def.time+'</span><span class="cstep">'+step+'</span></div>'+
+    '<div class="cmain">'+
+      '<div class="ckicker">'+(phase==='class'?'上课中':phase==='break'?'休息中':phase==='done'?'已完成':'准备上课')+'</div>'+
+      '<div class="ctimer'+timerClass+'" id="classTimer">'+timerText+'</div>'+
+      '<div class="ctitle">'+title+'</div>'+
+      '<div class="csub">'+sub+'</div>'+
+      reach+
+      '<div class="cbtns">'+btns+'</div>'+
+      (foot?'<div class="cfoot">'+foot+'</div>':'')+
+    '</div>';
+  var el;
+  if((el=document.getElementById('cpStart')))el.onclick=function(){startClass(bk,0);};
+  if((el=document.getElementById('cpPause')))el.onclick=pauseSession;
+  if((el=document.getElementById('cpResume')))el.onclick=resumeSession;
+  if((el=document.getElementById('cpEnd')))el.onclick=endClass;
+  if((el=document.getElementById('cpSkip')))el.onclick=skipBreak;
+  if((el=document.getElementById('cpNext')))el.onclick=nextClass;
+  if((el=document.getElementById('cpFinish')))el.onclick=function(){completeBlock(bk);closeClassPage();};
+  if((el=document.getElementById('cpBack')))el.onclick=closeClassPage;
+  if((el=document.getElementById('cpTopBack')))el.onclick=closeClassPage;
+  if((el=document.getElementById('cpReach'))){
+    el.oninput=function(){setClassReached(day,bk,c.key,el.value);};
+    el.onchange=function(){setClassReached(day,bk,c.key,el.value);save();};
+  }
+}
+
 function openClass(bk){
   curBlock=bk;renderClassSheet();
   document.getElementById('classmodal').classList.remove('hidden');
@@ -990,53 +1141,48 @@ function startClass(bk,idx){
   var c=BLOCK_DEFS[bk].classes[idx];if(!c)return;
   initAudio();
   day.session={block:bk,cls:idx,phase:'class',startedAt:Date.now(),endsAt:Date.now()+c.minutes*60000,paused:false,remainMs:0};
-  save();renderClassSheet();renderSheet();
+  save();renderClassUI();renderSheet();
 }
 function startBreak(){
   var day=state.days[curDate],s=day&&day.session;if(!s)return;
   var mins=BLOCK_DEFS[s.block].breaks[s.cls]||0;
   if(!mins){nextClass();return;}
   s.phase='break';s.endsAt=Date.now()+mins*60000;s.paused=false;s.remainMs=0;
-  save();renderClassSheet();renderSheet();
+  save();renderClassUI();renderSheet();
 }
 function nextClass(){
   var day=state.days[curDate],s=day&&day.session;if(!s)return;
   var next=Number(s.cls)+1;
   if(next>=BLOCK_DEFS[s.block].classes.length){
     s.phase='done';s.endsAt=0;s.paused=false;s.remainMs=0;
-    save();renderClassSheet();renderSheet();toast('本块课程结束');
+    save();renderClassUI();renderSheet();toast('本块课程结束');
   }else{
     startClass(s.block,next);
   }
 }
 function endClass(){
-  var day=state.days[curDate],s=day&&day.session;if(!s)return;
-  s.phase='classEnd';s.endsAt=0;s.paused=false;s.remainMs=0;
-  save();beep();renderClassSheet();renderSheet();
+  autoBreakAfterClass();
 }
 function pauseSession(){
   var day=state.days[curDate],s=day&&day.session;if(!s)return;
   if(s.phase!=='class'&&s.phase!=='break')return;
   s.remainMs=sessionRemain(s);s.paused=true;
-  save();renderClassSheet();renderSheet();
+  save();renderClassUI();renderSheet();
 }
 function resumeSession(){
   var day=state.days[curDate],s=day&&day.session;if(!s||!s.paused)return;
   s.endsAt=Date.now()+Math.max(0,Number(s.remainMs)||0);s.paused=false;
-  save();renderClassSheet();renderSheet();
+  save();renderClassUI();renderSheet();
 }
 function tickTimer(){
   var day=state.days[curDate],s=day&&day.session;if(!s)return;
   if(s.paused)return;
-  var big=document.getElementById('timerBig');
+  var big=document.getElementById('classTimer');
   if(big&&(s.phase==='class'||s.phase==='break'))big.textContent=fmtTime(sessionRemain(s));
-  if((s.phase==='class'||s.phase==='break')&&Date.now()>=Number(s.endsAt)){
-    s.phase=(s.phase==='class')?'classEnd':'breakEnd';
-    s.endsAt=0;s.paused=false;s.remainMs=0;
-    save();beep();
-    var cm=document.getElementById('classmodal');
-    if(cm&&!cm.classList.contains('hidden'))renderClassSheet();
-    renderSheet();
+  if(s.phase==='class'&&Date.now()>=Number(s.endsAt)){autoBreakAfterClass();return;}
+  if(s.phase==='break'&&Date.now()>=Number(s.endsAt)){
+    s.phase='breakEnd';s.endsAt=0;s.paused=false;s.remainMs=0;
+    save();beep();renderClassUI();renderSheet();return;
   }
 }
 function updateBlockTimers(){
@@ -2577,6 +2723,16 @@ renderSheet();
 syncCurriculum();
 syncPullSilent();
 setInterval(function(){tickTimer();updateBlockTimers();},1000);
+(function(){
+  var m=location.search.match(/[?&]class=([AB])/);
+  if(m){curBlock=m[1];var cr=document.getElementById('classroot');if(cr){cr.classList.remove('hidden');document.body.classList.add('classmode');renderClassPage();}}
+})();
+window.addEventListener('popstate',function(){
+  var m=location.search.match(/[?&]class=([AB])/);
+  var cr=document.getElementById('classroot');if(!cr)return;
+  if(m){curBlock=m[1];cr.classList.remove('hidden');document.body.classList.add('classmode');renderClassPage();}
+  else{cr.classList.add('hidden');document.body.classList.remove('classmode');renderSheet();}
+});
 /* 另一台设备改了数据：回到页面或每 2 分钟自动合并一次 */
 setInterval(function(){ if(!document.hidden)syncPullSilent(true); },120000);
 document.addEventListener('visibilitychange',function(){ if(!document.hidden)syncPullSilent(true); });
