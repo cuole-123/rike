@@ -443,7 +443,7 @@ input.num:focus{outline:0;border-bottom-color:var(--seal)}
 
 <script>
 /* ============ 基础 ============ */
-var LS_KEY='***';
+var LS_KEY='rike-v2-20261126';
 var SUBJECTS=[{id:'sf',name:'数分',cls:'sf'},{id:'gd',name:'高代',cls:'gd'},{id:'en',name:'英语',cls:'en'}];
 var TYPE_LABEL={video:'视频',exercise:'习题',note:'笔记',words:'单词',example:'例题'};
 var LEVELS=['D-','D','D+','C-','C','C+','B-','B','B+','A-','A','A+','S-','S','S+'];
@@ -706,6 +706,11 @@ function syncPullSilent(quiet){
       var remote=JSON.parse(txt);
       var localEmpty=!state.days||Object.keys(state.days).length===0;
       var changed=mergeRemote(remote);
+      var td=state.days[todayStr()];
+      if(td&&!td.submitted&&td.plan&&td.plan.some(function(id){return state.done[id];})){
+        td.plan=generatePlan();
+        changed=true;
+      }
       state.updatedAt=Math.max(Number(state.updatedAt)||0,Number(remote.updatedAt)||0);
       if(changed||localEmpty){
         try{ localStorage.setItem(LS_KEY,JSON.stringify(state)); }catch(e){}
