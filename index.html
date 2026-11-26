@@ -333,6 +333,62 @@ input.num:focus{outline:0;border-bottom-color:var(--seal)}
   letter-spacing:.06em;opacity:0;pointer-events:none;transition:.22s;z-index:99;max-width:86vw;text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .err{color:#B23A2E;font-size:11px;padding:10px;border:1px dashed #E4C9C2;margin:10px 0;white-space:pre-wrap}
+
+/* ===== 双块 ===== */
+.bcard{border:1px solid var(--line);background:#fff;border-radius:6px;padding:14px 14px 10px;margin:14px 0}
+.bcard.done{background:#FBF8F1}
+.bcard.done .bname{text-decoration:line-through;color:var(--ink3)}
+.bhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.bname{font:600 15px/1.4 var(--serif);letter-spacing:.04em;color:var(--ink)}
+.btime{font-size:10px;color:var(--ink3);letter-spacing:.06em;margin-top:3px}
+.bstat{font:600 11px var(--sans);color:var(--seal);white-space:nowrap}
+.bclasses{margin-top:10px;border-top:1px solid var(--line2);padding-top:8px}
+.bclass{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:baseline;padding:5px 0;font-size:11px;color:var(--ink2)}
+.bclass b{font:600 11px var(--sans);color:var(--ink);letter-spacing:.02em}
+.bclass i{font-style:normal;font-size:10px;color:var(--ink3);white-space:nowrap}
+.bbtns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.bbtns button{border:1px solid var(--line);background:transparent;border-radius:3px;padding:8px 11px;
+  font:600 10.5px var(--sans);letter-spacing:.08em;color:var(--ink2)}
+.bbtns .bstart{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.bbtns .bdonebtn{border-color:#E4C9C2;color:var(--seal)}
+.btasks{margin-top:8px;border-top:1px solid var(--line2);padding-top:4px}
+.btask{display:flex;gap:8px;align-items:baseline;padding:5px 0;font-size:11px;color:var(--ink2);border-bottom:1px solid #F5F1E9}
+.btask:last-child{border-bottom:0}
+.btask.done{opacity:.42;text-decoration:line-through}
+.bdot{width:14px;flex:0 0 14px;color:var(--seal);font-size:10px;text-align:center}
+.bref{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bcount{font-size:9.5px;color:var(--ink3);white-space:nowrap}
+.blink{border:0;background:none;font:500 9.5px var(--sans);color:var(--ink3);padding:0}
+.bempty{font-size:10.5px;color:var(--ink3);line-height:1.7;padding:8px 0 2px}
+.brun{margin-top:8px;font:600 10.5px var(--sans);color:var(--seal);letter-spacing:.06em}
+.meter .cnt{font:600 10.5px var(--sans);color:var(--ink2);letter-spacing:.02em}
+.meter .reached{font-size:9.5px;color:var(--seal);letter-spacing:.04em}
+
+/* ===== 上课计时 ===== */
+.tline{margin:12px 0 14px;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:6px 0}
+.tstep{display:flex;align-items:center;gap:9px;padding:6px 0;font-size:11px;color:var(--ink3)}
+.tstep .tdot{width:7px;height:7px;border-radius:50%;border:1px solid #C9C2B6;background:var(--paper);flex:0 0 7px}
+.tstep .tname{flex:1;color:var(--ink2)}
+.tstep .tmin{font:600 10px var(--sans);color:var(--ink3)}
+.tstep.cur{color:var(--seal)}
+.tstep.cur .tdot{background:var(--seal);border-color:var(--seal)}
+.tstep.cur .tname{color:var(--seal);font-weight:600}
+.tstep.done{opacity:.45}
+.tstep.done .tdot{background:#C29284;border-color:#C29284}
+.timerbig{font:600 54px/1 var(--serif);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums;letter-spacing:.02em;margin:8px 0 4px}
+.timerbig.warn{color:var(--seal)}
+.tsub{text-align:center;font-size:11px;color:var(--ink3);letter-spacing:.06em;margin-bottom:14px}
+.treach{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding:6px 0;margin:0 0 6px}
+.treach input{flex:1;border:0;background:transparent;font:600 26px/1 var(--serif);color:var(--ink);font-variant-numeric:tabular-nums}
+.treach input:focus{outline:0}
+.treach span{font-size:10.5px;color:var(--ink3);letter-spacing:.08em}
+.mnote{font-size:10.5px;color:var(--ink3);line-height:1.7;margin:8px 0 0}
+.misslist{max-height:46vh;overflow:auto;border-top:1px solid var(--line2);margin-top:8px}
+.missrow{display:flex;gap:9px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line2);font-size:11.5px;color:var(--ink2)}
+.missrow input{width:16px;height:16px;accent-color:var(--seal);margin-top:2px}
+.missrow .mr{flex:1;line-height:1.6}
+.missrow .mr small{color:var(--ink3);font-size:10px}
+
 </style>
 </head>
 <body>
@@ -368,12 +424,17 @@ input.num:focus{outline:0;border-bottom-color:var(--seal)}
   <div class="msheet">
     <div class="mtitle">记一笔</div>
     <div class="mref" id="mRef"></div>
-    <div class="mrow"><input id="mMin" type="number" min="0" max="600" step="5" inputmode="numeric"><span>分钟</span></div>
+    <div class="mrow" id="mReachedRow"><input id="mReached" type="number" min="0" max="999" inputmode="numeric"><span id="mUnit">题</span></div>
+    <div class="mnote" id="mNote"></div>
     <div class="mbtns"><button class="mno" id="mCancel">算了</button><button class="mok" id="mOk">记下</button></div>
   </div>
 </div>
 
 <div class="modal hidden" id="editmodal"><div class="msheet" id="msheetEdit"></div></div>
+
+<div class="modal hidden" id="classmodal"><div class="msheet" id="classSheet"></div></div>
+
+<div class="modal hidden" id="missmodal"><div class="msheet" id="missSheet"></div></div>
 
 <div class="cheer" id="cheer"><div class="c1"></div><div class="c2"></div><div class="c3"></div></div>
 
@@ -564,6 +625,8 @@ function mergeRemote(remote){
       else if(a.advance===undefined&&b.advance!==undefined)a.advance=b.advance;
       var bm=Number(b.minutes||0), am=Number(a.minutes||0);
       if(bm>am){a.minutes=b.minutes;changed=true;}
+      var br=Number(b.reached), ar=Number(a.reached);
+      if(b.reached!=null&&(a.reached==null||br>ar)){a.reached=b.reached;changed=true;}
       if(b.at&&(!a.at||b.at>a.at)){a.at=b.at;changed=true;}
     });
     ld.extras=ld.extras||[];
@@ -683,7 +746,8 @@ function syncCurriculum(){
           state.curVersion=data.version;
           if(data.defaults&&data.defaults.dailyTarget)state.settings.dailyTarget=data.defaults.dailyTarget;
           delete state.days[todayStr()];
-          save();renderSheet();
+          try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}
+          renderSheet();
           toast('课程表已更新到 v'+data.version);
         }
       }).catch(function(){});
@@ -696,6 +760,364 @@ function chapterOfTask(id){for(var i=0;i<state.curriculum.chapters.length;i++){v
   for(var j=0;j<ch.tasks.length;j++){if(ch.tasks[j].id===id)return ch;}}return null;}
 function isDone(id){return !!state.done[id];}
 function estMin(t){return Math.max(5,Math.round(t.baseMin*multOf(state.rating.level)));}
+
+/* ============ 双块 / 上课计时 ============ */
+var BLOCK_DEFS={
+  A:{key:'A',name:'A 块 · 下午',time:'15:00–18:00',sub:'做题 + 单词',
+     classes:[
+       {key:'sf',title:'数分习题',kind:'exercise',subject:'sf',minutes:60},
+       {key:'gd',title:'高代习题',kind:'exercise',subject:'gd',minutes:60},
+       {key:'en',title:'背单词',kind:'words',subject:'en',minutes:40}
+     ],breaks:[10,10]},
+  B:{key:'B',name:'B 块 · 晚上',time:'19:00–21:30',sub:'视频 + 费曼 + 笔记',
+     classes:[
+       {key:'sf',title:'数分视频',kind:'video',subject:'sf',minutes:50},
+       {key:'gd',title:'高代视频',kind:'video',subject:'gd',minutes:50},
+       {key:'note',title:'费曼/笔记',kind:'note',subject:'mix',minutes:40}
+     ],breaks:[5,5]}
+};
+var curBlock=null;
+
+function taskCount(t){
+  if(!t)return 0;
+  if(t.type==='words')return Number(t.count)||50;
+  if(t.type==='exercise'||t.type==='example')return Number(t.count)||Math.max(1,Math.round((Number(t.baseMin)||20)/6));
+  return 1;
+}
+function countLabel(t){
+  if(!t)return '';
+  if(t.type==='words')return '40–60 个';
+  if(t.type==='exercise'||t.type==='example')return taskCount(t)+' 题';
+  if(t.type==='video')return '1 讲';
+  if(t.type==='note')return '1 份';
+  return '1 项';
+}
+function blockOfTask(t){
+  if(!t)return 'A';
+  if(t.type==='words'||t.type==='exercise'||t.type==='example')return 'A';
+  return 'B';
+}
+function blockTasks(day,bk){
+  if(!day||!day.plan)return [];
+  return day.plan.filter(function(id){var t=taskById(id);return t&&blockOfTask(t)===bk;});
+}
+function classTasks(day,bk,c){
+  var ids=blockTasks(day,bk);
+  return ids.filter(function(id){
+    var t=taskById(id),ch=chapterOfTask(id);
+    if(!t||!ch)return false;
+    if(c.kind==='exercise')return (t.type==='exercise'||t.type==='example')&&ch.subject===c.subject;
+    if(c.kind==='words')return t.type==='words';
+    if(c.kind==='video')return t.type==='video'&&ch.subject===c.subject;
+    if(c.kind==='note')return t.type==='note';
+    return false;
+  });
+}
+function classTarget(day,bk,c){
+  var ids=classTasks(day,bk,c);
+  if(c.kind==='exercise'){var q=0;ids.forEach(function(id){q+=taskCount(taskById(id));});return q||8;}
+  if(c.kind==='words'){var w=0;ids.forEach(function(id){w+=taskCount(taskById(id));});return w||50;}
+  if(c.kind==='video'||c.kind==='note')return Math.max(1,ids.length);
+  return 1;
+}
+function classUnit(c){
+  if(c.kind==='exercise')return ' 题';
+  if(c.kind==='words')return ' 个';
+  if(c.kind==='video')return ' 讲';
+  return ' 份';
+}
+function classReached(day,bk,key){
+  var r=day&&day.reached&&day.reached[bk]&&day.reached[bk][key];
+  return r==null?0:Number(r);
+}
+function setClassReached(day,bk,key,v){
+  day.reached=day.reached||{};day.reached[bk]=day.reached[bk]||{};
+  day.reached[bk][key]=Number(v)||0;
+}
+function blockDoneCount(day,bk){
+  var ids=blockTasks(day,bk),n=0;
+  ids.forEach(function(id){if(day.items[id]&&day.items[id].done)n++;});
+  return n;
+}
+function blockDone(day,bk){
+  var ids=blockTasks(day,bk);
+  if(!ids.length)return !!(day.blockDone&&day.blockDone[bk]);
+  return ids.every(function(id){return day.items[id]&&day.items[id].done;});
+}
+function sessionRemain(s){
+  if(!s)return 0;
+  if(s.paused)return Math.max(0,Number(s.remainMs)||0);
+  if(s.phase==='class'||s.phase==='break')return Math.max(0,Number(s.endsAt)-Date.now());
+  return 0;
+}
+function fmtTime(ms){
+  ms=Math.max(0,Math.round(ms/1000));
+  var m=Math.floor(ms/60),sec=ms%60;
+  return (m<10?'0':'')+m+':'+(sec<10?'0':'')+sec;
+}
+function renderBlockCards(day){
+  if(!day)return '';
+  return ['A','B'].map(function(bk){
+    var def=BLOCK_DEFS[bk],ids=blockTasks(day,bk),n=ids.length,dn=blockDoneCount(day,bk),all=blockDone(day,bk);
+    var rows=ids.map(function(id){
+      var t=taskById(id),it=day.items[id]||{};
+      var ref=(it.replaced&&it.customRef)?it.customRef:t.ref;
+      return '<div class="btask'+(it.done?' done':'')+'">'+
+        '<span class="bdot">'+(it.done?'✓':'')+'</span>'+
+        '<span class="bref">'+esc(ref)+'</span>'+
+        '<span class="bcount">'+countLabel(t)+(it.reached!=null?' · 做到 '+it.reached:'')+'</span>'+
+        '<button class="blink" data-rep="'+id+'">替换</button></div>';
+    }).join('');
+    var cls=def.classes.map(function(c){
+      var target=classTarget(day,bk,c),reached=classReached(day,bk,c.key);
+      return '<div class="bclass"><span>'+c.title+'</span><b>预计 '+target+classUnit(c)+'</b><i>做到 '+reached+'</i></div>';
+    }).join('');
+    var s=(day.session&&day.session.block===bk)?day.session:null;
+    var active=s&&(s.phase==='class'||s.phase==='break');
+    return '<div class="bcard'+(all?' done':'')+'" data-block="'+bk+'">'+
+      '<div class="bhead"><div><div class="bname">'+def.name+'</div><div class="btime">'+def.time+' · '+def.sub+'</div></div>'+
+      '<div class="bstat">'+(n?(dn+'/'+n+' 项'):(all?'已完成':'0 项'))+'</div></div>'+
+      '<div class="bclasses">'+cls+'</div>'+
+      (active?'<div class="brun" data-btimer="'+bk+'">'+(s.paused?'已暂停 · ':'进行中 · ')+fmtTime(sessionRemain(s))+'</div>':'')+
+      '<div class="bbtns">'+
+        '<button class="bstart" data-bstart="'+bk+'">'+(active?'继续上课':'开始上课')+'</button>'+
+        '<button class="bdonebtn" data-bdone="'+bk+'">'+(n?(all?'编辑未完成项':'完成整块'):(all?'已完成':'标记完成'))+'</button>'+
+        (n&&dn>0&&!all?'<button class="bmiss" data-bmiss="'+bk+'">未完成项</button>':'')+
+      '</div>'+
+      (rows?'<div class="btasks">'+rows+'</div>':'<div class="bempty">今天这块没有拆到单题；按教材本节习题做，课上提交做到第几题。</div>')+
+    '</div>';
+  }).join('');
+}
+function bindBlockCards(day){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-bstart]'),function(el){
+    el.onclick=function(){openClass(el.getAttribute('data-bstart'));};
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-bdone]'),function(el){
+    el.onclick=function(){completeBlock(el.getAttribute('data-bdone'));};
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-bmiss]'),function(el){
+    el.onclick=function(){openMissed(el.getAttribute('data-bmiss'));};
+  });
+}
+function completeBlock(bk){
+  var day=state.days[curDate];if(!day)return;
+  var ids=blockTasks(day,bk);
+  ids.forEach(function(id){
+    var t=taskById(id),it=day.items[id]=day.items[id]||{};
+    it.done=true;it.at=Date.now();it.minutes=it.minutes||estMin(t);it.reached=taskCount(t);
+  });
+  day.blockDone=day.blockDone||{};day.blockDone[bk]=true;
+  BLOCK_DEFS[bk].classes.forEach(function(c){setClassReached(day,bk,c.key,classTarget(day,bk,c));});
+  save();renderSheet();
+  if(ids.length){openMissed(bk,true);}else{toast('已标记完成');}
+}
+function closeMissed(){
+  document.getElementById('missmodal').classList.add('hidden');
+}
+function openMissed(bk,fromComplete){
+  var day=state.days[curDate];if(!day)return;
+  var ids=blockTasks(day,bk);
+  var rows=ids.map(function(id){
+    var t=taskById(id),it=day.items[id]||{};
+    return '<label class="missrow"><input type="checkbox" data-miss="'+id+'" '+(!it.done?'checked':'')+'>'+
+      '<span class="mr">'+esc(it.replaced&&it.customRef?it.customRef:t.ref)+'<br><small>'+countLabel(t)+'</small></span></label>';
+  }).join('');
+  document.getElementById('missSheet').innerHTML=
+    '<div class="mtitle">'+BLOCK_DEFS[bk].name+' · 未完成项</div>'+
+    '<div class="mref">勾选 = 没做完；不勾 = 已完成</div>'+
+    (ids.length?'<div class="misslist">'+rows+'</div>':'<div class="mnote">这块没有单题，点保存即标记完成。</div>')+
+    '<div class="mbtns"><button class="mno" id="missCancel">取消</button><button class="mok" id="missOk">保存</button></div>';
+  document.getElementById('missmodal').classList.remove('hidden');
+  document.getElementById('missCancel').onclick=closeMissed;
+  document.getElementById('missOk').onclick=function(){
+    ids.forEach(function(id){
+      var cb=document.querySelector('[data-miss="'+id+'"]');
+      var t=taskById(id),it=day.items[id]=day.items[id]||{};
+      if(cb&&cb.checked){
+        it.done=false;delete it.at;it.reached=0;
+      }else{
+        it.done=true;it.at=it.at||Date.now();it.minutes=it.minutes||estMin(t);it.reached=taskCount(t);
+      }
+    });
+    day.blockDone=day.blockDone||{};day.blockDone[bk]=blockDone(day,bk);
+    BLOCK_DEFS[bk].classes.forEach(function(c){
+      var ts=classTasks(day,bk,c),r=0;
+      ts.forEach(function(id){
+        var it=day.items[id]||{};
+        if(it.done)r+=Number(it.reached!=null?it.reached:taskCount(taskById(id)));
+      });
+      setClassReached(day,bk,c.key,r);
+    });
+    save();closeMissed();renderSheet();toast('已更新未完成项');
+  };
+}
+function openClass(bk){
+  curBlock=bk;renderClassSheet();
+  document.getElementById('classmodal').classList.remove('hidden');
+}
+function closeClass(){
+  document.getElementById('classmodal').classList.add('hidden');
+  document.title='日课';
+  renderSheet();
+}
+function initAudio(){
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
+    if(!window._ac)window._ac=new AC();
+    if(window._ac.state==='suspended')window._ac.resume();
+  }catch(e){}
+}
+function beep(){
+  try{
+    initAudio();var ac=window._ac;if(!ac)return;
+    [0,240].forEach(function(delay){
+      setTimeout(function(){
+        var o=ac.createOscillator(),g=ac.createGain();
+        o.type='sine';o.frequency.value=880;g.gain.value=0.07;
+        o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+0.32);
+      },delay);
+    });
+    document.title='⏰ 下课';setTimeout(function(){document.title='日课';},5000);
+  }catch(e){}
+}
+function startClass(bk,idx){
+  var day=state.days[curDate];if(!day)return;
+  var c=BLOCK_DEFS[bk].classes[idx];if(!c)return;
+  initAudio();
+  day.session={block:bk,cls:idx,phase:'class',startedAt:Date.now(),endsAt:Date.now()+c.minutes*60000,paused:false,remainMs:0};
+  save();renderClassSheet();renderSheet();
+}
+function startBreak(){
+  var day=state.days[curDate],s=day&&day.session;if(!s)return;
+  var mins=BLOCK_DEFS[s.block].breaks[s.cls]||0;
+  if(!mins){nextClass();return;}
+  s.phase='break';s.endsAt=Date.now()+mins*60000;s.paused=false;s.remainMs=0;
+  save();renderClassSheet();renderSheet();
+}
+function nextClass(){
+  var day=state.days[curDate],s=day&&day.session;if(!s)return;
+  var next=Number(s.cls)+1;
+  if(next>=BLOCK_DEFS[s.block].classes.length){
+    s.phase='done';s.endsAt=0;s.paused=false;s.remainMs=0;
+    save();renderClassSheet();renderSheet();toast('本块课程结束');
+  }else{
+    startClass(s.block,next);
+  }
+}
+function endClass(){
+  var day=state.days[curDate],s=day&&day.session;if(!s)return;
+  s.phase='classEnd';s.endsAt=0;s.paused=false;s.remainMs=0;
+  save();beep();renderClassSheet();renderSheet();
+}
+function pauseSession(){
+  var day=state.days[curDate],s=day&&day.session;if(!s)return;
+  if(s.phase!=='class'&&s.phase!=='break')return;
+  s.remainMs=sessionRemain(s);s.paused=true;
+  save();renderClassSheet();renderSheet();
+}
+function resumeSession(){
+  var day=state.days[curDate],s=day&&day.session;if(!s||!s.paused)return;
+  s.endsAt=Date.now()+Math.max(0,Number(s.remainMs)||0);s.paused=false;
+  save();renderClassSheet();renderSheet();
+}
+function tickTimer(){
+  var day=state.days[curDate],s=day&&day.session;if(!s)return;
+  if(s.paused)return;
+  var big=document.getElementById('timerBig');
+  if(big&&(s.phase==='class'||s.phase==='break'))big.textContent=fmtTime(sessionRemain(s));
+  if((s.phase==='class'||s.phase==='break')&&Date.now()>=Number(s.endsAt)){
+    s.phase=(s.phase==='class')?'classEnd':'breakEnd';
+    s.endsAt=0;s.paused=false;s.remainMs=0;
+    save();beep();
+    var cm=document.getElementById('classmodal');
+    if(cm&&!cm.classList.contains('hidden'))renderClassSheet();
+    renderSheet();
+  }
+}
+function updateBlockTimers(){
+  var day=state.days[curDate],s=day&&day.session;if(!s)return;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-btimer]'),function(el){
+    var bk=el.getAttribute('data-btimer');
+    if(bk===s.block&&(s.phase==='class'||s.phase==='break')){
+      el.textContent=(s.paused?'已暂停 · ':'进行中 · ')+fmtTime(sessionRemain(s));
+    }
+  });
+}
+function renderClassSheet(){
+  var bk=curBlock;if(!bk)return;
+  var day=state.days[curDate];if(!day)return;
+  var def=BLOCK_DEFS[bk];
+  var s=(day.session&&day.session.block===bk)?day.session:null;
+  var curCls=s?Number(s.cls)||0:0;
+  var phase=s?s.phase:'idle';
+  var stepIndex=-1;
+  if(s){
+    if(phase==='class'||phase==='classEnd')stepIndex=curCls*2;
+    else if(phase==='break'||phase==='breakEnd')stepIndex=curCls*2+1;
+    else if(phase==='done')stepIndex=99;
+  }
+  var steps=[];
+  def.classes.forEach(function(c,i){
+    steps.push({kind:'class',title:'第 '+(i+1)+' 节 · '+c.title,min:c.minutes});
+    if(i<def.breaks.length)steps.push({kind:'break',title:'休息',min:def.breaks[i]});
+  });
+  var tline=steps.map(function(st,idx){
+    var cl=idx<stepIndex?'done':(idx===stepIndex?'cur':'');
+    return '<div class="tstep '+cl+'"><span class="tdot"></span><span class="tname">'+st.title+'</span><span class="tmin">'+st.min+'′</span></div>';
+  }).join('');
+  var c=def.classes[curCls]||def.classes[0];
+  var sub='';
+  if(!s||phase==='idle')sub='第 1 节 · '+def.classes[0].title+' · 预计 '+classTarget(day,bk,def.classes[0])+classUnit(def.classes[0]);
+  else if(phase==='class')sub='第 '+(curCls+1)+' 节 · '+c.title+' · 预计 '+classTarget(day,bk,c)+classUnit(c);
+  else if(phase==='classEnd')sub='第 '+(curCls+1)+' 节下课 · 记下做到第几题';
+  else if(phase==='break')sub='休息 '+def.breaks[curCls]+' 分钟';
+  else if(phase==='breakEnd')sub='休息结束 · 准备第 '+(curCls+2)+' 节';
+  else if(phase==='done')sub='本块结束';
+  var remain=0;
+  if(s){remain=(phase==='class'||phase==='break')?sessionRemain(s):0;}
+  else{remain=def.classes[0].minutes*60000;}
+  var reach='';
+  if((c.kind==='exercise'||c.kind==='words')&&(!s||phase==='class'||phase==='classEnd'||phase==='break'||phase==='breakEnd')){
+    reach='<div class="treach"><input id="tReached" type="number" min="0" max="999" inputmode="numeric" value="'+classReached(day,bk,c.key)+'"><span>做到第几'+(c.kind==='words'?'个':'题')+'</span></div>';
+  }
+  var btns='';
+  function btn(id,text,cls){return '<button class="'+(cls||'mno')+'" id="'+id+'">'+text+'</button>';}
+  if(!s||phase==='idle'){btns=btn('startCls','开始第 1 节','mok')+btn('closeCls','关闭');}
+  else if(phase==='class'){
+    if(s.paused)btns=btn('resumeCls','继续','mok')+btn('endCls','提前下课')+btn('closeCls','关闭');
+    else btns=btn('pauseCls','暂停')+btn('endCls','提前下课')+btn('closeCls','关闭');
+  }else if(phase==='classEnd'){
+    if(curCls>=def.classes.length-1)btns=btn('finishCls','完成本块','mok')+btn('closeCls','关闭');
+    else btns=btn('breakCls','开始休息','mok')+btn('nextCls','直接下一节')+btn('closeCls','关闭');
+  }else if(phase==='break'){
+    if(s.paused)btns=btn('resumeCls','继续','mok')+btn('skipBreak','跳过休息')+btn('closeCls','关闭');
+    else btns=btn('pauseCls','暂停')+btn('skipBreak','跳过休息')+btn('closeCls','关闭');
+  }else if(phase==='breakEnd'){
+    btns=btn('nextCls','开始第 '+(curCls+2)+' 节','mok')+btn('closeCls','关闭');
+  }else if(phase==='done'){
+    btns=btn('finishCls','完成本块','mok')+btn('closeCls','关闭');
+  }
+  document.getElementById('classSheet').innerHTML=
+    '<div class="mtitle">'+def.name+' · '+def.time+'</div>'+
+    '<div class="mref">'+def.sub+' · 3 节课 + 2 次休息</div>'+
+    '<div class="tline">'+tline+'</div>'+
+    '<div class="timerbig'+(remain>0&&remain<60000?' warn':'')+'" id="timerBig">'+fmtTime(remain)+'</div>'+
+    '<div class="tsub" id="timerSub">'+sub+'</div>'+
+    reach+
+    '<div class="mbtns">'+btns+'</div>';
+  var el;
+  if((el=document.getElementById('startCls')))el.onclick=function(){startClass(bk,0);};
+  if((el=document.getElementById('pauseCls')))el.onclick=pauseSession;
+  if((el=document.getElementById('resumeCls')))el.onclick=resumeSession;
+  if((el=document.getElementById('endCls')))el.onclick=endClass;
+  if((el=document.getElementById('breakCls')))el.onclick=startBreak;
+  if((el=document.getElementById('skipBreak')))el.onclick=nextClass;
+  if((el=document.getElementById('nextCls')))el.onclick=nextClass;
+  if((el=document.getElementById('finishCls')))el.onclick=function(){completeBlock(bk);closeClass();};
+  if((el=document.getElementById('closeCls')))el.onclick=closeClass;
+  if((el=document.getElementById('tReached')))el.onchange=function(){setClassReached(day,bk,c.key,el.value);save();};
+}
+
 
 /* ============ 计划 ============ */
 var SUBJ_WEIGHT={sf:0.56,gd:0.28,en:0.16};   /* 单词 16%，其余 84% 按 数分:高代 = 2:1 */
@@ -1232,10 +1654,24 @@ function openComplete(id){
   var day=state.days[curDate]||{items:{}};
   var it=day.items[id]||{};
   document.getElementById('mRef').textContent=t?t.ref:'';
-  var m=document.getElementById('mMin');
-  m.value=(it.minutes!=null?it.minutes:(t?estMin(t):30));
+  var row=document.getElementById('mReachedRow');
+  var input=document.getElementById('mReached');
+  var note=document.getElementById('mNote');
+  var unit=document.getElementById('mUnit');
+  var countable=t&&(t.type==='exercise'||t.type==='example'||t.type==='words');
+  if(countable){
+    row.classList.remove('hidden');
+    var c=taskCount(t);
+    input.value=(it.reached!=null&&Number(it.reached)>0?it.reached:c);
+    input.max=Math.max(c,1);
+    unit.textContent=(t.type==='words'?'个':'题');
+    note.textContent='预计 '+countLabel(t)+'；做到第几题就填几，不用填时间。';
+  }else{
+    row.classList.add('hidden');
+    note.textContent='点“记下”即完成，不用填时间。';
+  }
   document.getElementById('modal').classList.remove('hidden');
-  setTimeout(function(){try{m.focus();m.select();}catch(e){}},140);
+  setTimeout(function(){try{if(countable){input.focus();input.select();}}catch(e){}},140);
 }
 function closeComplete(){
   document.getElementById('modal').classList.add('hidden');
@@ -1245,16 +1681,31 @@ function closeComplete(){
 function confirmComplete(){
   var id=pendingComplete;if(!id)return;
   var day=state.days[curDate];if(!day)return;
-  var mins=Number(document.getElementById('mMin').value)||0;
+  var t=taskById(id);
+  var countable=t&&(t.type==='exercise'||t.type==='example'||t.type==='words');
+  var reached=0;
+  if(countable){reached=Number(document.getElementById('mReached').value)||0;}
   var inPlan=day.plan.indexOf(id)>=0;
   day.items[id]=day.items[id]||{};
   day.items[id].done=true;
-  day.items[id].minutes=mins;
+  day.items[id].minutes=estMin(t||{baseMin:30});
+  if(countable)day.items[id].reached=reached;
   day.items[id].at=Date.now();
   if(!inPlan){
     day.items[id].early=true;
-    state.done[id]=curDate;      /* 提前完成 → 进度指针前进 */
+    state.done[id]=curDate;
   }
+  try{
+    var bk=blockOfTask(t);
+    BLOCK_DEFS[bk].classes.forEach(function(c){
+      var ts=classTasks(day,bk,c);
+      if(ts.indexOf(id)>=0){
+        var r=0;
+        ts.forEach(function(tid){var x=day.items[tid]||{};if(x.done)r+=Number(x.reached!=null?x.reached:taskCount(taskById(tid)));});
+        setClassReached(day,bk,c.key,r);
+      }
+    });
+  }catch(e){}
   save();
   var tt=taskById(id);
   if(tt&&tt.type==='note'){
@@ -1268,6 +1719,7 @@ function confirmComplete(){
   renderSheet();
   cheer();
 }
+
 function undoLast(){
   var day=state.days[curDate];if(!day)return;
   var lastId=null,lastAt=-1;
@@ -1313,13 +1765,21 @@ function renderSheet(){
     if(!day||!day.plan.length){document.getElementById('sheet').innerHTML=head+'<div class="empty">这一天没有记录。</div>';bindDayNav();return;}
     if(day.submitted){renderReview(day,head);bindDayNav();return;}
 
-    var totalEst=0,doneN=0,actSum=0,rows=[];
+    var totalEst=0,doneN=0,actSum=0,qTotal=0,qReached=0,lectN=0,wordN=0,rows=[];
     day.plan.forEach(function(id){
       var t=taskById(id);if(!t)return;
       var ch=chapterOfTask(id);if(!ch)return;
       var s=subjOf(ch.subject), e=estMin(t);totalEst+=e;
       var it=day.items[id]||{}, mins=(it.minutes!=null)?it.minutes:e;
-      if(it.done){doneN++;actSum+=Number(mins);return;}
+      var tc=taskCount(t);
+      if(t.type==='exercise'||t.type==='example')qTotal+=tc;
+      if(t.type==='video')lectN++;
+      if(t.type==='words')wordN+=tc;
+      if(it.done){
+        doneN++;actSum+=Number(mins);
+        if(t.type==='exercise'||t.type==='example'||t.type==='words')qReached+=Number(it.reached!=null?it.reached:tc);
+        return;
+      }
       if(it.mergedId)return;                    /* 已合并的任务由合并条目代表 */
       var custom=it.customRef||'';
       var replaced=!!it.replaced;
@@ -1341,7 +1801,7 @@ function renderSheet(){
         (t.diff?'<span class="stars">'+'★'.repeat(t.diff)+'</span>':'')+'</div>'+
         refHtml+
         (t.tip&&!replaced?'<div class="tip">↳ '+esc(t.tip)+'</div>':'')+
-        (!multiSel.on&&!replaced?'<div class="meter"><span>预计</span><input type="number" min="0" max="600" step="5" value="'+mins+'" data-min="'+id+'"><span>分钟</span></div>':'')+
+        (!multiSel.on&&!replaced?'<div class="meter"><span>预计</span><b class="cnt">'+countLabel(t)+'</b>'+(it.reached!=null?'<span class="reached">· 做到 '+it.reached+'</span>':'')+'</div>':'')+
         (!multiSel.on?'<div class="acts">'+
           (replaced
             ? '<button class="linkbtn" data-unrep="'+id+'">取消替换</button><button class="linkbtn" data-rep="'+id+'">改内容</button>'
@@ -1351,20 +1811,13 @@ function renderSheet(){
     });
 
     document.getElementById('sheet').innerHTML=head+
-      '<div class="block"><div class="seclbl">今日指令</div>'+
-      '<div class="metaline">评级 '+state.rating.level+' · 预计 '+totalEst+' 分钟 · '+day.plan.length+' 项<br>'+
-        (function(){
-          var b={sf:0,gd:0,en:0};
-          day.plan.forEach(function(id){
-            var t=taskById(id),ch=chapterOfTask(id);
-            if(t&&ch)b[ch.subject]+=estMin(t);
-          });
-          return '数分 '+b.sf+' · 高代 '+b.gd+' · 单词 '+b.en+' 分钟';
-        })()+'</div>'+
+      renderBlockCards(day)+
+      '<div class="block"><div class="seclbl">逐项编辑 · 替换 / 合并</div>'+
+      '<div class="metaline">评级 '+state.rating.level+' · 预计 '+qTotal+' 题 · '+wordN+' 词 · '+lectN+' 讲 · '+day.plan.length+' 项</div>'+
       '<ul class="tasks" id="tasks">'+rows.join('')+'</ul>'+
       '<div class="seclbl" style="margin-top:20px">提前做 <span style="letter-spacing:.08em;color:#B3ACA0">可选 · 完成即推进度</span></div>'+
       bonusHtml(day)+
-      (doneN?'<div class="donebar">已划掉 <b>'+doneN+'</b> 项 · '+actSum+' 分钟'+
+      (doneN?'<div class="donebar">已划掉 <b>'+doneN+'</b> 项'+
         '<button id="undoBtn">撤销上一项</button></div>':'')+
       '<div class="meta" style="font-size:10.5px;color:var(--ink3);margin-top:10px;letter-spacing:.06em">'+
         '左滑一条任务，划掉即完成</div>'+
@@ -1377,9 +1830,9 @@ function renderSheet(){
             '<button id="mergeToggle">⇄ 合并替换</button>')+
       '</div>'+
 
-      '<div class="sum"><div><div class="k">预计</div><div class="v" id="sumEst">'+totalEst+'<small> min</small></div></div>'+
+      '<div class="sum"><div><div class="k">预计</div><div class="v" id="sumEst">'+qTotal+'<small> 题</small></div></div>'+
       '<div><div class="k">已完成</div><div class="v" id="sumDone">'+doneN+'<small> 项</small></div></div>'+
-      '<div><div class="k">实际</div><div class="v" id="sumAct">'+actSum+'<small> min</small></div></div></div>'+
+      '<div><div class="k">做到</div><div class="v" id="sumAct">'+qReached+'<small> 题</small></div></div></div>'+
       '<button class="stampbtn" id="submitBtn">盖 章 提 交</button></div>';
 
     bindSheet();bindDayNav();
@@ -1388,6 +1841,7 @@ function renderSheet(){
 
 function bindSheet(){
   var day=state.days[curDate];if(!day)return;
+  bindBlockCards(day);
   if(multiSel.on){
     Array.prototype.forEach.call(document.querySelectorAll('[data-msel]'),function(el){
       el.onclick=function(e){
@@ -1462,11 +1916,14 @@ function bindSheet(){
 }
 function refreshSum(){
   var day=state.days[curDate];if(!day)return;
-  var doneN=0,act=0;
-  day.plan.forEach(function(id){var it=day.items[id]||{};if(it.done){doneN++;act+=Number(it.minutes||0);}});
+  var doneN=0,q=0;
+  day.plan.forEach(function(id){
+    var t=taskById(id),it=day.items[id]||{};
+    if(it.done){doneN++;q+=Number(it.reached!=null?it.reached:taskCount(t));}
+  });
   var a=document.getElementById('sumDone'),b=document.getElementById('sumAct');
   if(a)a.innerHTML=doneN+'<small> 项</small>';
-  if(b)b.innerHTML=act+'<small> min</small>';
+  if(b)b.innerHTML=q+'<small> 题</small>';
 }
 
 function doSubmit(){
@@ -1656,6 +2113,9 @@ function renderReview(day,head){
   try{
     var r=scoreDay(day);
     var pct=Math.round(r.completion*100), effPct=Math.round(r.eff*100);
+    var qReached=0,qTarget=0;
+    day.plan.forEach(function(id){var t=taskById(id),it=day.items[id]||{};if(t)qTarget+=taskCount(t);if(it.done)qReached+=Number(it.reached!=null?it.reached:taskCount(t));});
+    var qPct=qTarget?Math.round(qReached/qTarget*100):0;
     var bar=function(label,v,col){
       return '<div class="bar"><div class="muted">'+label+'</div>'+
         '<div class="track"><div class="fill" style="width:'+Math.min(100,v)+'%;background:'+col+'"></div></div>'+
@@ -1670,9 +2130,9 @@ function renderReview(day,head){
     document.getElementById('sheet').innerHTML=head+
       '<div class="review"><div class="seclbl">今日复盘</div>'+
       '<div class="score-row"><div class="bigscore">'+r.score+'<small> / 100</small></div>'+
-      '<div class="score-side">完成度 '+pct+'%<br>用时 '+(r.actual||0)+' / '+r.planEst+' 分钟</div></div>'+
+      '<div class="score-side">完成度 '+pct+'%<br>做到 '+qReached+' 题</div></div>'+
       '<div class="cmt">'+(day.comment||commentFor(r))+'</div>'+
-      '<div class="bars">'+bar('完成度',pct,'#B23A2E')+bar('时间效率',effPct,'#3F6B65')+'</div>'+
+      '<div class="bars">'+bar('完成度',pct,'#B23A2E')+bar('题数进度',qPct,'#3F6B65')+'</div>'+
       '<div class="sum" style="margin-top:22px">'+
         '<div><div class="k">完成</div><div class="v">'+r.doneCount+'<small> / '+r.planCount+' 项</small></div></div>'+
         '<div><div class="k">今日行进</div><div class="v">'+steps+'<small> 步</small></div></div>'+
@@ -2109,6 +2569,7 @@ ensureDay(todayStr());
 renderSheet();
 syncCurriculum();
 syncPullSilent();
+setInterval(function(){tickTimer();updateBlockTimers();},1000);
 /* 另一台设备改了数据：回到页面或每 2 分钟自动合并一次 */
 setInterval(function(){ if(!document.hidden)syncPullSilent(true); },120000);
 document.addEventListener('visibilitychange',function(){ if(!document.hidden)syncPullSilent(true); });
